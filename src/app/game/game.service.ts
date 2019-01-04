@@ -1,0 +1,170 @@
+import { Injectable } from '@angular/core';
+import { AngularFirestore } from 'angularfire2/firestore';
+import 'rxjs/Rx';
+import { Subject } from 'rxjs/Subject';
+import { map } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+
+import { Player } from '../player/player.model';
+import { GameSession, GameSessionImpl } from './gameSession.model';
+
+@Injectable()
+export class GameService {
+  playerOne: Player;
+  playerOneChanged = new Subject<Player>();
+
+  playerTwo: Player;
+  playerTwoChanged = new Subject<Player>();
+
+  playersChanged = new Subject<Player[]>();
+  players: Player[] = [];
+  private fbSubs: Subscription[] = [];
+
+  gameSession: GameSession;
+  // sessionChanged = new Subject<GameSession>();
+
+  constructor(private db: AngularFirestore) {}
+
+  startNewGame(pTwo: Player) {
+    this.addPlayerTwo(pTwo)
+      .then(res => {
+        this.createGameSession()
+          .then(res => {
+            this.updateGameIdOnPlayers();
+          });
+      });
+//TODO
+//wait for confirmation,
+    // if(pTwo.status === 'accepted') {
+    // }
+  }
+
+  createGameSession() {
+    this.gameSession = new GameSessionImpl('', this.playerOne.id, this.playerTwo.id);
+    return this.db.collection('games').add({...this.gameSession})
+      .then(ref => {
+        this.gameSession.gId = ref.id;
+        // this.sessionChanged.next(this.gameSession);
+        console.log("---debug-createGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
+      });
+  }
+
+  addPlayerOne(pOne: Player) {
+    this.db.collection('players').add({...pOne})
+      .then(docRef => {
+        this.playerOne = pOne;
+        this.playerOne.id = docRef.id;
+        this.playerOneChanged.next(this.playerOne);
+        console.log("---debug-addPlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
+    });
+  }
+
+  addPlayerTwo(pTwo: Player) {
+
+    //TODO if status != '' -> requested player is busy
+
+    return this.db.collection('players').doc(pTwo.id).update({status: 'requested'})
+      .then(result => {
+        this.playerTwo = pTwo;
+        this.playerTwoChanged.next(this.playerTwo);
+        console.log("---debug-addPlayerTwo: ", JSON.parse(JSON.stringify(this.playerTwo)));
+      });
+  }
+
+  updateGameIdOnPlayers() {
+    this.db.collection('players').doc(this.playerOne.id).update({gameId: this.gameSession.gId});
+    this.db.collection('players').doc(this.playerTwo.id).update({gameId: this.gameSession.gId});
+  }
+
+  fetchAvailablePlayers() {
+    this.fbSubs.push(this.db
+      .collection('players')
+      .snapshotChanges()
+      .pipe(
+        map(docArray => {
+          return docArray.map(doc => {
+            return {
+              id: doc.payload.doc.id,
+              name: (doc.payload.doc.data() as Player).name,
+              gameId: (doc.payload.doc.data() as Player).gameId,
+              winCount: (doc.payload.doc.data() as Player).winCount,
+              lastChosen: (doc.payload.doc.data() as Player).lastChosen,
+              status: (doc.payload.doc.data() as Player).status,
+            };
+          });
+        })
+      ).subscribe((players: Player[]) => {
+        this.players = players;
+        this.playersChanged.next([...this.players]);
+      }));
+  }
+
+  // snapshotToArray(snapshot: firebase.database.DataSnapshot) {
+  //   var returnArr = [];
+  //
+  //   snapshot.forEach(childSnapshot => {
+  //       var item = childSnapshot.val();
+  //       returnArr.push(item);
+  //   });
+  //
+  //   return returnArr;
+  // }
+
+  cancelSubscriptions() {
+    this.fbSubs.forEach(sub => sub.unsubscribe());
+  }
+
+  evaluateWinner() {
+    if(this.playerOne.lastChosen === this.playerTwo.lastChosen) {
+      return 'Draw!';
+    }
+    else if((this.playerOne.lastChosen === 'rock' && (this.playerTwo.lastChosen === 'lizard' || this.playerTwo.lastChosen === 'scissors')) ||
+       (this.playerOne.lastChosen === 'paper' && (this.playerTwo.lastChosen === 'rock' || this.playerTwo.lastChosen === 'spock')) ||
+       (this.playerOne.lastChosen === 'scissors' && (this.playerTwo.lastChosen === 'paper' || this.playerTwo.lastChosen === 'lizard')) ||
+       (this.playerOne.lastChosen === 'lizard' && (this.playerTwo.lastChosen === 'paper' ||this.playerTwo.lastChosen === 'spock')) ||
+       (this.playerOne.lastChosen === 'spock' && (this.playerTwo.lastChosen === 'rock' || this.playerTwo.lastChosen === 'scissors'))) {
+      this.playerOne.winCount++;
+      return 'Player ' + this.playerOne.name + ' wins!';
+    }
+    else {
+      this.playerTwo.winCount++;
+      return 'Player ' + this.playerTwo.name + ' wins!'
+    }
+  }
+
+  resetApp() {
+    this.cancelSubscriptions();
+    this.resetGameSession();
+    return this.resetPlayers();
+  }
+
+  resetGameSession() {
+    this.db.collection('games').doc(this.gameSession.gId).delete()
+      .then(ref => {
+        console.log('---debug-reset-session');
+        this.gameSession = null;
+      });
+  }
+
+  resetPlayers() {
+    return this.db.collection('players').doc(this.playerOne.id).delete()
+      .then(ref => {
+        console.log('---debug-reset-players');
+        this.playerOne = null;
+        this.playerTwo = null;
+    });
+  }
+
+  updatePlayerOneChoiceAndTryEvaluate(choice: string) {
+    console.log('---debug-update-choice: ' + choice);
+    this.db.collection('players').doc(this.playerOne.id).update({lastChosen: choice})
+      .then(ref => {
+        this.playerOne.lastChosen = choice;
+        this.playerOneChanged.next(this.playerOne);
+
+        if(this.playerTwo.lastChosen != '') {
+          this.gameSession.result = this.evaluateWinner();
+        }
+      });
+  }
+}

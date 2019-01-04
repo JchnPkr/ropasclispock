@@ -1,0 +1,41 @@
+<div *ngIf="gService.playerTwo">
+  <div class="row">
+    <div class="col">
+      <app-player></app-player>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col">
+      <div class="btn-toolbar justify-content-center" role="toolbar" aria-label="Toolbar with button groups">
+        <form [formGroup]="radioGroupForm">
+          <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="model" (change)="onSubmit($event)">
+            <label ngbButtonLabel class="btn btn-secondary">
+              <input ngbButton type="radio" value="rock">Rock
+            </label>
+            <label ngbButtonLabel class="btn btn-secondary">
+              <input ngbButton type="radio" value="paper">Paper
+            </label>
+            <label ngbButtonLabel class="btn btn-secondary">
+              <input ngbButton type="radio" value="scissors">Scissors
+            </label>
+            <label ngbButtonLabel class="btn btn-secondary">
+              <input ngbButton type="radio" value="lizard">Lizard
+            </label>
+            <label ngbButtonLabel class="btn btn-secondary">
+              <input ngbButton type="radio" value="spock">Spock
+            </label>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div fxLayoutAlign="center center"
+     *ngIf="!gService.playerTwo">
+  <app-opponent-list></app-opponent-list>
+</div>
+<div fxLayoutAlign="center center"
+     *ngIf="gService.gameSession && gService.gameSession.result">
+  <h2>{{ gService.gameSession.result }}</h2>
+</div>

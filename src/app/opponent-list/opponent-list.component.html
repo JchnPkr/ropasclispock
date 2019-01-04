@@ -1,0 +1,9 @@
+<h2>Choose a player to start a new Game, or wait till you are invited.</h2>
+<div class="row">
+  <div class="col-md-5">
+    <app-opponent
+      *ngFor="let opponent of opponentList"
+      [opponent]="opponent">
+    </app-opponent>
+  </div>
+</div>
