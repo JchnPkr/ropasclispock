@@ -21,7 +21,7 @@ export class GameService {
   private fbSubs: Subscription[] = [];
 
   gameSession: GameSession;
-  // sessionChanged = new Subject<GameSession>();
+  sessionChanged = new Subject<GameSession>();
 
   constructor(private db: AngularFirestore) {}
 
@@ -44,16 +44,16 @@ export class GameService {
     return this.db.collection('games').add({...this.gameSession})
       .then(ref => {
         this.gameSession.gId = ref.id;
-        // this.sessionChanged.next(this.gameSession);
+        this.sessionChanged.next(this.gameSession);
         console.log("---debug-createGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
       });
   }
 
   addPlayerOne(pOne: Player) {
+    pOne.status = 'waiting';
     this.db.collection('players').add({...pOne})
       .then(docRef => {
-        this.playerOne = pOne;
-        this.playerOne.id = docRef.id;
+        this.playerOne = this.players.find(i => i.id === docRef.id);
         this.playerOneChanged.next(this.playerOne);
         console.log("---debug-addPlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
     });
@@ -65,7 +65,7 @@ export class GameService {
 
     return this.db.collection('players').doc(pTwo.id).update({status: 'requested'})
       .then(result => {
-        this.playerTwo = pTwo;
+        this.playerTwo = this.players.find(i => i.id === pTwo.id);
         this.playerTwoChanged.next(this.playerTwo);
         console.log("---debug-addPlayerTwo: ", JSON.parse(JSON.stringify(this.playerTwo)));
       });
@@ -124,10 +124,12 @@ export class GameService {
        (this.playerOne.lastChosen === 'lizard' && (this.playerTwo.lastChosen === 'paper' ||this.playerTwo.lastChosen === 'spock')) ||
        (this.playerOne.lastChosen === 'spock' && (this.playerTwo.lastChosen === 'rock' || this.playerTwo.lastChosen === 'scissors'))) {
       this.playerOne.winCount++;
+      this.db.collection('players').doc(this.playerOne.id).update({winCount: this.playerOne.winCount});
       return 'Player ' + this.playerOne.name + ' wins!';
     }
     else {
       this.playerTwo.winCount++;
+      this.db.collection('players').doc(this.playerTwo.id).update({winCount: this.playerTwo.winCount});
       return 'Player ' + this.playerTwo.name + ' wins!'
     }
   }
@@ -139,20 +141,37 @@ export class GameService {
   }
 
   resetGameSession() {
-    this.db.collection('games').doc(this.gameSession.gId).delete()
-      .then(ref => {
-        console.log('---debug-reset-session');
-        this.gameSession = null;
-      });
+    if(this.gameSession) {
+      this.db.collection('games').doc(this.gameSession.gId).delete()
+        .then(ref => {
+          console.log('---debug-reset-session');
+          this.gameSession = null;
+        });
+    }
   }
 
   resetPlayers() {
-    return this.db.collection('players').doc(this.playerOne.id).delete()
-      .then(ref => {
-        console.log('---debug-reset-players');
-        this.playerOne = null;
-        this.playerTwo = null;
-    });
+    if(this.playerOne) {
+      return this.db.collection('players').doc(this.playerOne.id).delete()
+        .then(ref => {
+          console.log('---debug-reset-players');
+          this.playerOne = null;
+          this.playerTwo = null;
+      });
+    }
+    else {
+      var promise = new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+        console.log("---debug: playerOne already null! resolved anyways!");
+        resolve();
+        }, 1000);
+      });
+      return promise;
+    }
+  }
+
+  resetGamePlay() {
+    this.db.collection('games').doc(this.gameSession.gId).update({result: null});
   }
 
   updatePlayerOneChoiceAndTryEvaluate(choice: string) {
@@ -163,7 +182,12 @@ export class GameService {
         this.playerOneChanged.next(this.playerOne);
 
         if(this.playerTwo.lastChosen != '') {
-          this.gameSession.result = this.evaluateWinner();
+          let result = this.evaluateWinner();
+          this.db.collection('games').doc(this.gameSession.gId).update({result: result})
+            .then(ref => {
+              this.gameSession.result = result;
+              this.sessionChanged.next(this.gameSession);
+            });
         }
       });
   }

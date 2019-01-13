@@ -27,7 +27,7 @@ export class AuthService {
           else {
             this.gService.cancelSubscriptions();
             this.authChange.next(false);
-            this.router.navigate(['/logIn']);
+            this.router.navigate(['/']);
             this.isAuthenticated = false;
           }
         }
