@@ -41,6 +41,10 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
     background-color: mat-color($accent);
     color: mat-color($accent, default-contrast);
   }
+
+  .opponent-item {
+    background-color: mat-color($primary);
+  }
 }
 
 // Include the mixin

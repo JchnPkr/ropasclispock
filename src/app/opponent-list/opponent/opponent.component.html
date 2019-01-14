@@ -1,8 +1,8 @@
-<a class="list-group-item list-group-item-action"
+<a class="list-group-item list-group-item-action opponent-item"
   style= "cursor: pointer"
   (click)="onSelect()"
   *ngIf="opponent.state === 'waiting'">
-  <div class="player-div" fxLayout="column" fxLayoutAlign="center center">
+  <div fxLayout="column" fxLayoutAlign="center center">
     <h4 class="list-group-item-heading">{{ opponent.name }}</h4>
     <p class="list-group-item-text">{{ opponent.state }}</p>
   </div>
