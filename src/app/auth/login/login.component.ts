@@ -4,11 +4,11 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
 
 @Component({
-  selector: 'app-signin',
-  templateUrl: './signin.component.html',
-  styleUrls: ['./signin.component.css']
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
-export class SigninComponent implements OnInit {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
 
   constructor(private authService: AuthService) { }
@@ -20,8 +20,8 @@ export class SigninComponent implements OnInit {
     })
   }
 
-  onSignIn() {
-    this.authService.signinUser({
+  onLogin() {
+    this.authService.loginUser({
       email: this.loginForm.value.email,
       password: this.loginForm.value.password
     });

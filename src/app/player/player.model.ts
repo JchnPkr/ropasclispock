@@ -4,7 +4,7 @@ export interface Player {
   gameId: string;
   winCount: number;
   lastChosen: string;
-  status: string;
+  state: string;
 }
 
 export class PlayerImpl implements Player{
@@ -13,14 +13,14 @@ export class PlayerImpl implements Player{
   gameId: string;
   winCount: number;
   lastChosen: string;
-  status: string;
+  state: string;
 
   constructor(name: string) {
-    this.id = null;
+    this.id = '';
     this.name = name;
     this.gameId = '';
     this.winCount = 0;
     this.lastChosen = '';
-    this.status = '';
+    this.state = 'waiting';
   }
 }

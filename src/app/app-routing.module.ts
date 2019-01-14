@@ -5,12 +5,14 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { GameComponent } from './game/game.component';
 import { SignupComponent } from './auth/signup/signup.component';
-import { SigninComponent } from './auth/signin/signin.component';
+import { LoginComponent } from './auth/login/login.component';
+import { OpponentListComponent } from './opponent-list/opponent-list.component';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'signUp', component: SignupComponent},
-  { path: 'logIn', component: SigninComponent},
+  { path: 'signup', component: SignupComponent},
+  { path: 'login', component: LoginComponent},
+  { path: 'opponentList', component: OpponentListComponent},
   { path: 'game', component: GameComponent, canActivate: [AuthGuard]}
 ]
 

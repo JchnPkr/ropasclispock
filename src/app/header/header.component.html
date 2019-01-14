@@ -15,17 +15,25 @@
              *ngIf="authService.isAuth()">Game</a>
         </li>
       </ul>
+      <ul class="navbar-nav">
+        <li role="presentation"
+            routerLinkActive="active">
+          <a class="nav-link"
+             routerLink="/opponentList"
+             *ngIf="authService.isAuth()">Opponents</a>
+        </li>
+      </ul>
       <ul class="navbar-nav ml-auto">
         <ng-template [ngIf]="!authService.isAuth()">
           <li role="presentation"
               routerLinkActive="active">
             <a class="nav-link"
-               routerLink="/signUp">Register</a>
+               routerLink="/signup">Signup</a>
           </li>
           <li role="presentation"
               routerLinkActive="active">
             <a class="nav-link"
-               routerLink="/logIn">Login</a>
+               routerLink="/login">Login</a>
           </li>
         </ng-template>
         <li role="presentation"

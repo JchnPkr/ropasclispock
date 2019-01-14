@@ -21,13 +21,13 @@ import { AuthService } from './auth/auth.service';
 import { OpponentListComponent } from './opponent-list/opponent-list.component';
 import { OpponentComponent } from './opponent-list/opponent/opponent.component';
 import { GameService } from './game/game.service';
-import { SigninComponent } from './auth/signin/signin.component';
+import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    SigninComponent,
+    LoginComponent,
     SignupComponent,
     GameComponent,
     HeaderComponent,

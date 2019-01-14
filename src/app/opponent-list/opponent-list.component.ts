@@ -11,21 +11,40 @@ import { GameService } from '../game/game.service';
 })
 export class OpponentListComponent implements OnInit, OnDestroy {
   opponentList: Player[];
-  subscription: Subscription;
+  playersSubscription: Subscription;
+
+  playerOne: Player;
+  playerOneSubscription: Subscription;
 
   constructor(private gameService: GameService) { }
 
   ngOnInit() {
-    this.subscription = this.gameService.playersChanged.subscribe(
+    this.playersSubscription = this.gameService.playersChanged.subscribe(
       (players: Player[]) => {
         this.opponentList = players;
       }
     );
 
-    this.gameService.fetchAvailablePlayers();
+    this.playerOneSubscription = this.gameService.playerOneChanged.subscribe(
+      (player: Player) => {
+        this.playerOne = player;
+      }
+    );
+
+    // this.gameService.fetchAvailablePlayers();
+  }
+
+  onSubmit(event: any) {
+    if(event.value === 'accept') {
+      // this.gameService.addPlayerTwoToGame();
+    }
+    else if(event.value === 'decline') {
+
+    }
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    this.playersSubscription.unsubscribe();
+    this.playerOneSubscription.unsubscribe();
   }
 }

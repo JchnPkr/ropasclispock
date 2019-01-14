@@ -22,7 +22,7 @@ export class AuthService {
           if(user) {
             this.isAuthenticated = true;
             this.authChange.next(true);
-            this.router.navigate(['/game']);
+            this.router.navigate(['/opponentList']);
           }
           else {
             this.gService.cancelSubscriptions();
@@ -34,24 +34,24 @@ export class AuthService {
       );
     }
 
-  registerUser(authData: AuthData) {
+  signupUser(authData: AuthData) {
     this.afAuth.auth.createUserWithEmailAndPassword(
       authData.email,
       authData.password
     ).then(result => {
       console.log(result);
-      this.gService.addPlayerOne(new PlayerImpl(authData.email.split('@')[0]));
+      this.gService.addPlayerOneToDB(new PlayerImpl(authData.email.split('@')[0]));
     }).catch(error => {
       console.log(error);
     });
   }
 
-  signinUser(authData: AuthData) {
+  loginUser(authData: AuthData) {
     this.afAuth.auth.signInWithEmailAndPassword(
       authData.email, authData.password
     ).then(result => {
       console.log(result);
-      this.gService.addPlayerOne(new PlayerImpl(authData.email.split('@')[0]));
+      this.gService.addPlayerOneToDB(new PlayerImpl(authData.email.split('@')[0]));
     }).catch(error => {
       console.log(error);
     });
