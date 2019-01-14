@@ -1,29 +1,41 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<!-- <mat-toolbar color="primary">
+  <div>
+    <a routerLink="/">Home</a>
+  </div>
+  <div fxFlex fxLayout fxLayoutAlign="flex-end" fxHide.xs>
+    <ul fxLayout fxLayoutGap="10px" class="navigation-items">
+      <ng-template [ngIf]="!authService.isAuth()">
+        <li role="presentation"
+            routerLinkActive="active">
+          <a class="nav-link"
+             routerLink="/signup">Signup</a>
+        </li>
+        <li role="presentation"
+            routerLinkActive="active">
+          <a class="nav-link"
+             routerLink="/login">Login</a>
+        </li>
+      </ng-template>
+      <li role="presentation"
+          routerLinkActive="active">
+        <a class="nav-link"
+           style= "cursor: pointer"
+           (click)="onLogout()"
+           *ngIf="authService.isAuth()">Logout</a>
+      </li>
+    </ul>
+  </div>
+</mat-toolbar> -->
+<nav class="navbar navbar-inverse navbar-fixed-top navbar-collapse navbar-dark bg-dark" id="head-navbar">
   <div class="container-fluid">
     <div class="navbar-header">
-      <a routerLink="/"
+      <a
+         routerLinkActive="active"
+         routerLink="/"
          class="navbar-brand">Home
       </a>
     </div>
-
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav">
-        <li role="presentation"
-            routerLinkActive="active">
-          <a class="nav-link"
-             routerLink="/game"
-             *ngIf="authService.isAuth()">Game</a>
-        </li>
-      </ul>
-      <ul class="navbar-nav">
-        <li role="presentation"
-            routerLinkActive="active">
-          <a class="nav-link"
-             routerLink="/opponentList"
-             *ngIf="authService.isAuth()">Opponents</a>
-        </li>
-      </ul>
-      <ul class="navbar-nav ml-auto">
+      <ul class="nav navbar-nav pull-right">
         <ng-template [ngIf]="!authService.isAuth()">
           <li role="presentation"
               routerLinkActive="active">
@@ -45,5 +57,4 @@
         </li>
       </ul>
     </div>
-  </div>
 </nav>

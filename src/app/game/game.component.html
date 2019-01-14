@@ -1,4 +1,3 @@
-<div *ngIf="gService.playerTwo">
   <div class="row">
     <div class="col">
       <app-player></app-player>
@@ -9,16 +8,25 @@
     <div class="col">
       <div class="btn-toolbar justify-content-center" role="toolbar" aria-label="Toolbar with button groups">
         <mat-button-toggle-group (change)="onSubmit($event)" [disabled]="isDisabled" [(ngModel)]="groupModel">
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="rock">Rock</mat-button-toggle>
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="paper">Paper</mat-button-toggle>
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="scissors">Scissors</mat-button-toggle>
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="lizard">Lizard</mat-button-toggle>
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="spock">Spock</mat-button-toggle>
+          <mat-button-toggle [checked]="groupModel == 'foo'" value="rock">
+            <i class="fas fa-hand-rock fa-4x"></i>
+          </mat-button-toggle>
+          <mat-button-toggle [checked]="groupModel == 'foo'" value="paper">
+            <i class="fas fa-hand-paper fa-4x"></i>
+          </mat-button-toggle>
+          <mat-button-toggle [checked]="groupModel == 'foo'" value="scissors">
+            <i class="fas fa-hand-scissors fa-4x"></i>
+          </mat-button-toggle>
+          <mat-button-toggle [checked]="groupModel == 'foo'" value="lizard">
+            <i class="fas fa-hand-lizard fa-4x"></i>
+          </mat-button-toggle>
+          <mat-button-toggle [checked]="groupModel == 'foo'" value="spock">
+            <i class="fas fa-hand-spock fa-4x"></i>
+          </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
     </div>
   </div>
-</div>
 <div fxLayout="column" fxLayoutAlign="center center"
      *ngIf="gameSession && gameSession.result">
   <h2>{{ gameSession.result }}</h2>

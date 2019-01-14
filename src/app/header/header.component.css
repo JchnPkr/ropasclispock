@@ -1,0 +1,14 @@
+#head-navbar {
+  width: 100%;
+  white-space: normal;
+  display: inline-block;
+  overflow: hidden;
+}
+.nav>li {
+  display: inline-block;
+  white-space: nowrap;
+  padding-left: 10px;
+}
+ul.navbar-nav{
+  display: inline-block;
+}

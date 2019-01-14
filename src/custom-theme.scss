@@ -33,8 +33,8 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
   }
 
   .mat-button-toggle-checked {
-    background-color: mat-color($accent);
-    color: mat-color($accent, default-contrast);
+    background-color: mat-color($primary);
+    color: mat-color($primary, default-contrast);
   }
 
   .mat-button-toggle-disabled{
