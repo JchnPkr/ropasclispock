@@ -19,6 +19,8 @@ export class OpponentComponent implements OnInit {
 
   onSelect() {
     this.gameService.startNewGame(this.opponent)
-    // this.router.navigate(['game/' + gId]);
+      .then(ref => {
+        this.router.navigate(['game/' + this.gameService.gameSession.gId]);
+      });
   }
 }

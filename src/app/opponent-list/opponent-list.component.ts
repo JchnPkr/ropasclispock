@@ -36,7 +36,8 @@ export class OpponentListComponent implements OnInit, OnDestroy {
 
   onSubmit(event: any) {
     if(event.value === 'accept') {
-      // this.gameService.addPlayerTwoToGame();
+      // this.gameService.getRequestingPlayer();
+      // this.gameService.startNewGame(playerTwo);
     }
     else if(event.value === 'decline') {
 

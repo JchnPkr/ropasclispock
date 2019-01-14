@@ -58,22 +58,22 @@ export class GameService {
         this.playersChanged.next([...this.players]);
         console.log("---debug: Fetched players! ", JSON.parse(JSON.stringify(this.players)));
 
-        this.addPlayerOneToGame();
+        this.updatePlayerOneInGame();
       }));
   }
 
-  addPlayerOneToGame() {
+  updatePlayerOneInGame() {
     this.playerOne = this.players.find(i => i.id === this.playerOne.id);
     this.playerOneChanged.next(this.playerOne);
-    console.log("---debug-addPlayerOneToGame: ", JSON.parse(JSON.stringify(this.playerOne)));
+    console.log("---debug-updatePlayerOneInGame: ", JSON.parse(JSON.stringify(this.playerOne)));
   }
 
   startNewGame(pTwo: Player) {
-    this.addPlayerTwoToGame(pTwo)
+    return this.addPlayerTwoToGame(pTwo)
       .then(res => {
-        this.createGameSession()
+        return this.createGameSession()
           .then(res => {
-            this.updateGameIdOnPlayers();
+            return this.updateGameIdOnPlayers();
           });
       });
 //TODO
@@ -110,14 +110,14 @@ export class GameService {
         this.playerOne.gameId = this.gameSession.gId;
         this.playerOneChanged.next(this.playerTwo);
         console.log("---debug: PlayerOne gameId update: ", JSON.parse(JSON.stringify(this.playerOne)));
-      });
 
-    this.db.collection('players').doc(this.playerTwo.id).update({gameId: this.gameSession.gId})
+    return this.db.collection('players').doc(this.playerTwo.id).update({gameId: this.gameSession.gId})
       .then(result => {
         this.playerTwo.gameId = this.gameSession.gId;
         this.playerTwoChanged.next(this.playerTwo);
         console.log("---debug: PlayerTwo gameId update: ", JSON.parse(JSON.stringify(this.playerTwo)));
       });
+    });
   }
 
   updatePlayerOneChoiceAndTryEvaluate(choice: string) {
