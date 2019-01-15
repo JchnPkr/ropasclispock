@@ -1,4 +1,29 @@
-<div class="row justify-content-center">
+<div class="content">
+  <mat-card>
+    <mat-card-content>
+      <div class="player-content">
+        <mat-list>
+          <mat-list-item> <strong>Player:</strong><span class="player-text"> {{ playerOne.name }} </span></mat-list-item>
+          <mat-list-item> <strong>Wins:</strong><span class="player-text"> {{ playerOne.winCount }} </span></mat-list-item>
+          <mat-list-item> <strong>Last chosen:</strong><span class="player-text"> {{ playerOne.lastChosen }} </span></mat-list-item>
+        </mat-list>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card>
+    <mat-card-content>
+      <div class="player-content">
+        <mat-list>
+          <mat-list-item> <strong>Player:</strong><span class="player-text"> {{ playerTwo.name }} </span></mat-list-item>
+          <mat-list-item> <strong>Wins:</strong><span class="player-text"> {{ playerTwo.winCount }} </span></mat-list-item>
+          <mat-list-item> <strong>Last chosen:</strong><span class="player-text"> {{ playerTwo.lastChosen }} </span></mat-list-item>
+        </mat-list>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- <div class="row justify-content-center">
   <div class="col-sm-2">
     Player: {{ playerOne.name }}
   </div>
@@ -29,4 +54,4 @@
   <div class="col-sm-2">
     State: {{ playerTwo.state }}
   </div>
-</div>
+</div> -->

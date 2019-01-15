@@ -1,0 +1,17 @@
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.player-content {
+  font-size: 20px;
+}
+
+.mat-card {
+  background-color: #59b300;
+  margin: 1em;
+}
+
+.player-text {
+  padding-left: 7px;
+}
