@@ -16,6 +16,10 @@ export class OpponentListComponent implements OnInit, OnDestroy {
   playerOne: Player;
   playerOneSubscription: Subscription;
 
+  playerTwo: Player;
+  playerTwoSubscription: Subscription;
+
+
   constructor(private gameService: GameService) { }
 
   ngOnInit() {
@@ -31,7 +35,11 @@ export class OpponentListComponent implements OnInit, OnDestroy {
       }
     );
 
-    // this.gameService.fetchAvailablePlayers();
+    this.playerTwoSubscription = this.gameService.playerTwoChanged.subscribe(
+      (player: Player) => {
+        this.playerTwo = player;
+      }
+    );
   }
 
   onSubmit(event: any) {

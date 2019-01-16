@@ -66,6 +66,10 @@ export class GameService {
     this.playerOne = this.players.find(i => i.id === this.playerOne.id);
     this.playerOneChanged.next(this.playerOne);
     console.log("---debug-updatePlayerOneInGame: ", JSON.parse(JSON.stringify(this.playerOne)));
+
+    if(this.playerOne.state ==='requested') {
+      this.updateGameSessionFromRequest();
+    }
   }
 
   startNewGame(pTwo: Player) {
@@ -76,16 +80,9 @@ export class GameService {
             return this.updateGameIdOnPlayers();
           });
       });
-//TODO
-//wait for confirmation,
-    // if(pTwo.state === 'accepted') {
-    // }
   }
 
   addPlayerTwoToGame(pTwo: Player) {
-
-    //TODO if state != 'waiting' -> requested player is busy
-
     return this.db.collection('players').doc(pTwo.id).update({state: 'requested'})
       .then(result => {
         this.playerTwo = this.players.find(i => i.id === pTwo.id);
@@ -104,7 +101,7 @@ export class GameService {
       });
   }
 
-    updateGameIdOnPlayers() {
+  updateGameIdOnPlayers() {
     this.db.collection('players').doc(this.playerOne.id).update({gameId: this.gameSession.gId})
       .then(result => {
         this.playerOne.gameId = this.gameSession.gId;
@@ -118,6 +115,29 @@ export class GameService {
         console.log("---debug: PlayerTwo gameId update: ", JSON.parse(JSON.stringify(this.playerTwo)));
       });
     });
+  }
+
+  updateGameSessionFromRequest() {
+    var gId = this.playerOne.gameId;
+    this.db.collection('games').doc(gId).snapshotChanges()
+      .subscribe(doc => {
+        //gameSession from DB was created by requester, so pOneId of this session is pTwoId
+        //for this client actually
+        var pTwoId = (doc.payload.data() as GameSession).pOneId;
+        this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
+        this.sessionChanged.next(this.gameSession);
+        console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
+
+        this.updatePlayerTwoFromRequest();
+      });
+  }
+
+  updatePlayerTwoFromRequest() {
+    //gameSession from DB was created by requester, so pOneId of this session is pTwoId
+    //for this client actually
+    this.playerTwo = this.players.find(i => i.id === this.gameSession.pOneId);
+    this.playerTwoChanged.next(this.playerTwo);
+    console.log("---debug-updatePlayerTwoFromRequest: ", JSON.parse(JSON.stringify(this.playerTwo)));
   }
 
   updatePlayerOneChoiceAndTryEvaluate(choice: string) {
