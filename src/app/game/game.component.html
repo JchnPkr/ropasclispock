@@ -7,21 +7,21 @@
   <div class="row">
     <div class="col">
       <div class="btn-toolbar justify-content-center" role="toolbar" aria-label="Toolbar with button groups">
-        <mat-button-toggle-group (change)="onSubmit($event)" [disabled]="isDisabled" [(ngModel)]="groupModel">
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="rock">
-            <i class="fas fa-hand-rock fa-4x"></i>
+        <mat-button-toggle-group (change)="onSubmit($event)" [disabled]="isDisabled">
+          <mat-button-toggle value="rock">
+            <i class="fas fa-hand-rock fa-3x"></i>
           </mat-button-toggle>
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="paper">
-            <i class="fas fa-hand-paper fa-4x"></i>
+          <mat-button-toggle value="paper">
+            <i class="fas fa-hand-paper fa-3x"></i>
           </mat-button-toggle>
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="scissors">
-            <i class="fas fa-hand-scissors fa-4x"></i>
+          <mat-button-toggle value="scissors">
+            <i class="fas fa-hand-scissors fa-3x"></i>
           </mat-button-toggle>
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="lizard">
-            <i class="fas fa-hand-lizard fa-4x"></i>
+          <mat-button-toggle value="lizard">
+            <i class="fas fa-hand-lizard fa-3x"></i>
           </mat-button-toggle>
-          <mat-button-toggle [checked]="groupModel == 'foo'" value="spock">
-            <i class="fas fa-hand-spock fa-4x"></i>
+          <mat-button-toggle value="spock">
+            <i class="fas fa-hand-spock fa-3x"></i>
           </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
@@ -31,6 +31,6 @@
      *ngIf="gameSession && gameSession.result">
   <h2>{{ gameSession.result }}</h2>
   <button mat-raised-button color="accent" (click)="onReset()">
-    <mat-icon>refresh</mat-icon>
+    <mat-icon class="black-icon">refresh</mat-icon>
   </button>
 </div>

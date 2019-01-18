@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
+import { Router } from '@angular/router';
 
 import { Player } from '../player/player.model';
 import { GameService } from '../game/game.service';
@@ -20,7 +21,8 @@ export class OpponentListComponent implements OnInit, OnDestroy {
   playerTwoSubscription: Subscription;
 
 
-  constructor(private gameService: GameService) { }
+  constructor(private gameService: GameService,
+              private router: Router) {}
 
   ngOnInit() {
     this.playersSubscription = this.gameService.playersChanged.subscribe(
@@ -44,11 +46,10 @@ export class OpponentListComponent implements OnInit, OnDestroy {
 
   onSubmit(event: any) {
     if(event.value === 'accept') {
-      // this.gameService.getRequestingPlayer();
-      // this.gameService.startNewGame(playerTwo);
+      this.router.navigate(['game/' + this.gameService.gameSession.gId]);
     }
     else if(event.value === 'decline') {
-
+      this.gameService.declineGame();
     }
   }
 

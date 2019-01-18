@@ -58,18 +58,42 @@ export class GameService {
         this.playersChanged.next([...this.players]);
         console.log("---debug: Fetched players! ", JSON.parse(JSON.stringify(this.players)));
 
-        this.updatePlayerOneInGame();
+        this.updatePlayerOne();
       }));
   }
 
-  updatePlayerOneInGame() {
+  updatePlayerOne() {
     this.playerOne = this.players.find(i => i.id === this.playerOne.id);
     this.playerOneChanged.next(this.playerOne);
-    console.log("---debug-updatePlayerOneInGame: ", JSON.parse(JSON.stringify(this.playerOne)));
+    console.log("---debug-updatePlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
 
+    this.updateGameSessionFromRequest();
+  }
+
+  updateGameSessionFromRequest() {
     if(this.playerOne.state ==='requested') {
-      this.updateGameSessionFromRequest();
+      var gId = this.playerOne.gameId;
+      this.db.collection('games').doc(gId).snapshotChanges()
+        .take(1).subscribe(doc => {
+          //gameSession from DB was created by requester, so pOneId of this session is pTwoId
+          //for this client actually
+          // console.log("---debug-updateGameSessionFromRequest (doc): ", JSON.parse(JSON.stringify(doc)));
+          var pTwoId = (doc.payload.data() as GameSession).pOneId;
+          this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
+          this.sessionChanged.next(this.gameSession);
+          console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
+
+          this.updatePlayerTwoFromRequest();
+        });
     }
+  }
+
+  updatePlayerTwoFromRequest() {
+    //gameSession from DB was created by requester, so pOneId of this session is pTwoId
+    //for this client actually
+    this.playerTwo = this.players.find(i => i.id === this.gameSession.pOneId);
+    this.playerTwoChanged.next(this.playerTwo);
+    console.log("---debug-updatePlayerTwoFromRequest: ", JSON.parse(JSON.stringify(this.playerTwo)));
   }
 
   startNewGame(pTwo: Player) {
@@ -88,6 +112,15 @@ export class GameService {
         this.playerTwo = this.players.find(i => i.id === pTwo.id);
         this.playerTwoChanged.next(this.playerTwo);
         console.log("---debug-addPlayerTwo: ", JSON.parse(JSON.stringify(this.playerTwo)));
+      });
+  }
+
+  updatePlayerOneStateInGame() {
+    this.db.collection('players').doc(this.playerOne.id).update({state: 'requested'})
+      .then(result => {
+        this.playerOne = this.players.find(i => i.id === this.playerOne.id);
+        this.playerOneChanged.next(this.playerOne);
+        console.log("---debug-addPlayerTwo: ", JSON.parse(JSON.stringify(this.playerOne)));
       });
   }
 
@@ -115,29 +148,6 @@ export class GameService {
         console.log("---debug: PlayerTwo gameId update: ", JSON.parse(JSON.stringify(this.playerTwo)));
       });
     });
-  }
-
-  updateGameSessionFromRequest() {
-    var gId = this.playerOne.gameId;
-    this.db.collection('games').doc(gId).snapshotChanges()
-      .subscribe(doc => {
-        //gameSession from DB was created by requester, so pOneId of this session is pTwoId
-        //for this client actually
-        var pTwoId = (doc.payload.data() as GameSession).pOneId;
-        this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
-        this.sessionChanged.next(this.gameSession);
-        console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
-
-        this.updatePlayerTwoFromRequest();
-      });
-  }
-
-  updatePlayerTwoFromRequest() {
-    //gameSession from DB was created by requester, so pOneId of this session is pTwoId
-    //for this client actually
-    this.playerTwo = this.players.find(i => i.id === this.gameSession.pOneId);
-    this.playerTwoChanged.next(this.playerTwo);
-    console.log("---debug-updatePlayerTwoFromRequest: ", JSON.parse(JSON.stringify(this.playerTwo)));
   }
 
   updatePlayerOneChoiceAndTryEvaluate(choice: string) {
@@ -189,6 +199,11 @@ export class GameService {
     }
   }
 
+  declineGame() {
+    this.resetGameSession();
+    console.log("---debug-cancelGame");
+  }
+
   resetApp() {
     this.cancelSubscriptions();
     this.resetGameSession();
@@ -197,10 +212,19 @@ export class GameService {
 
   resetGameSession() {
     if(this.gameSession) {
+      // if(this.gameSub) {
+      //   console.log("---debug: resetGameSession (unsubscribe): ", JSON.parse(JSON.stringify(this.gameSession)));
+      //   console.log("---debug: resetGameSession (gameSub): ", JSON.parse(JSON.stringify(this.gameSession)));
+      //   this.gameSub.unsubscribe();
+      // }
+
       this.db.collection('games').doc(this.gameSession.gId).delete()
         .then(ref => {
           console.log('---debug-reset-session');
           this.gameSession = null;
+          this.sessionChanged.next(this.gameSession);
+          this.resetPlayerTwo();
+          this.resetPlayerOneGameSession();
         });
     }
   }
@@ -219,7 +243,7 @@ export class GameService {
         setTimeout(() => {
         console.log("---debug: playerOne already null! resolved anyways!");
         resolve();
-        }, 1000);
+        }, 1);
       });
       return promise;
     }
@@ -230,7 +254,26 @@ export class GameService {
       .then(ref => {
         this.gameSession.result = null;
         this.sessionChanged.next(this.gameSession);
+        console.log("---debug-resetGame");
         this.resetLastChosenOnPlayers();
+      });
+  }
+
+  resetPlayerTwo() {
+    this.db.collection('players').doc(this.playerTwo.id).update({gameId: null, state: 'waiting'})
+      .then(ref => {
+        this.playerTwo = null;
+        this.playerTwoChanged.next(this.playerTwo);
+        console.log("---debug-resetPlayerTwo");
+      });
+  }
+
+  resetPlayerOneGameSession() {
+    this.db.collection('players').doc(this.playerOne.id).update({gameId: null, state: 'waiting'})
+      .then(ref => {
+        this.playerOne = this.players.find(i => i.id === this.playerOne.id);
+        this.playerOneChanged.next(this.playerOne);
+        console.log("---debug-resetPlayerOneGameSession");
       });
   }
 
@@ -246,9 +289,11 @@ export class GameService {
     //     this.playerTwo.lastChosen = null;
     //     this.playerTwoChanged.next(this.playerTwo);
     //   });
+    console.log("---debug-resetLastChosenOnPlayers");
   }
 
   cancelSubscriptions() {
-    this.fbSubs.forEach(sub => sub.unsubscribe());
+  this.fbSubs.forEach(sub => sub.unsubscribe());
+    console.log("---debug-cancelSubscriptions");
   }
 }

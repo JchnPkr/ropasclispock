@@ -14,7 +14,6 @@ export class GameComponent implements OnInit {
   sessionSubscription: Subscription;
 
   isDisabled = false;
-  groupModel: string;
 
   constructor(private gService: GameService) {}
 
@@ -36,6 +35,5 @@ export class GameComponent implements OnInit {
   onReset() {
     this.gService.resetGame();
     this.isDisabled = false;
-    this.groupModel = null;
   }
 }
