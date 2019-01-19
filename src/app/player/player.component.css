@@ -7,11 +7,11 @@
   font-size: 20px;
 }
 
-.mat-card {
-  background-color: #ffa64d;
-  margin: 1em;
-}
-
 .player-text {
   padding-left: 7px;
+}
+
+.mat-card {
+  background-color: #ffb84d;
+  margin: 1em;
 }
