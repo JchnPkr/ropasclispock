@@ -22,6 +22,7 @@ export class GameService {
 
   gameSession: GameSession;
   sessionChanged = new Subject<GameSession>();
+  sessionSub = new Subscription;
 
   constructor(private db: AngularFirestore) {}
 
@@ -73,17 +74,24 @@ export class GameService {
   updateGameSessionFromRequest() {
     if(this.playerOne.state ==='requested') {
       var gId = this.playerOne.gameId;
-      this.db.collection('games').doc(gId).snapshotChanges()
-        .take(1).subscribe(doc => {
-          //gameSession from DB was created by requester, so pOneId of this session is pTwoId
-          //for this client actually
-          // console.log("---debug-updateGameSessionFromRequest (doc): ", JSON.parse(JSON.stringify(doc)));
-          var pTwoId = (doc.payload.data() as GameSession).pOneId;
-          this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
-          this.sessionChanged.next(this.gameSession);
-          console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
+      this.sessionSub = this.db.collection('games').doc(gId).snapshotChanges()
+        .subscribe(doc => {
+          if(doc.payload.data()) {
+            //gameSession from DB was created by requester, so pOneId of this session is pTwoId
+            //for this client actually
+            // console.log("---debug-updateGameSessionFromRequest (doc): ", JSON.parse(JSON.stringify(doc)));
+            var pTwoId = (doc.payload.data() as GameSession).pOneId;
+            this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
+            this.sessionChanged.next(this.gameSession);
+            console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
 
-          this.updatePlayerTwoFromRequest();
+            this.updatePlayerTwoFromRequest();
+          }
+          else {
+            this.gameSession = null;
+            this.sessionChanged.next(this.gameSession);
+            console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
+          }
         });
     }
   }
@@ -97,12 +105,24 @@ export class GameService {
   }
 
   startNewGame(pTwo: Player) {
-    return this.addPlayerTwoToGame(pTwo)
+    return this.updatePlayerOneStateInGame('inGame')
       .then(res => {
-        return this.createGameSession()
+        return this.addPlayerTwoToGame(pTwo)
           .then(res => {
-            return this.updateGameIdOnPlayers();
+            return this.createGameSession()
+              .then(res => {
+                return this.updateGameIdOnPlayers();
+              });
           });
+      });
+  }
+
+  updatePlayerOneStateInGame(state: string) {
+    return this.db.collection('players').doc(this.playerOne.id).update({state: state})
+      .then(result => {
+        this.playerOne = this.players.find(i => i.id === this.playerOne.id);
+        this.playerOneChanged.next(this.playerOne);
+        console.log("---debug-updatePlayerOneStateInGame: ", JSON.parse(JSON.stringify(this.playerOne)));
       });
   }
 
@@ -112,15 +132,6 @@ export class GameService {
         this.playerTwo = this.players.find(i => i.id === pTwo.id);
         this.playerTwoChanged.next(this.playerTwo);
         console.log("---debug-addPlayerTwo: ", JSON.parse(JSON.stringify(this.playerTwo)));
-      });
-  }
-
-  updatePlayerOneStateInGame() {
-    this.db.collection('players').doc(this.playerOne.id).update({state: 'requested'})
-      .then(result => {
-        this.playerOne = this.players.find(i => i.id === this.playerOne.id);
-        this.playerOneChanged.next(this.playerOne);
-        console.log("---debug-addPlayerTwo: ", JSON.parse(JSON.stringify(this.playerOne)));
       });
   }
 
@@ -138,7 +149,7 @@ export class GameService {
     this.db.collection('players').doc(this.playerOne.id).update({gameId: this.gameSession.gId})
       .then(result => {
         this.playerOne.gameId = this.gameSession.gId;
-        this.playerOneChanged.next(this.playerTwo);
+        this.playerOneChanged.next(this.playerOne);
         console.log("---debug: PlayerOne gameId update: ", JSON.parse(JSON.stringify(this.playerOne)));
 
     return this.db.collection('players').doc(this.playerTwo.id).update({gameId: this.gameSession.gId})
@@ -199,25 +210,18 @@ export class GameService {
     }
   }
 
-  declineGame() {
-    this.resetGameSession();
-    console.log("---debug-cancelGame");
-  }
-
   resetApp() {
     this.cancelSubscriptions();
     this.resetGameSession();
     return this.resetPlayers();
   }
 
+  /**
+   *this method resets the calling client side
+   *and session data in DB
+   */
   resetGameSession() {
     if(this.gameSession) {
-      // if(this.gameSub) {
-      //   console.log("---debug: resetGameSession (unsubscribe): ", JSON.parse(JSON.stringify(this.gameSession)));
-      //   console.log("---debug: resetGameSession (gameSub): ", JSON.parse(JSON.stringify(this.gameSession)));
-      //   this.gameSub.unsubscribe();
-      // }
-
       this.db.collection('games').doc(this.gameSession.gId).delete()
         .then(ref => {
           console.log('---debug-reset-session');
@@ -273,22 +277,34 @@ export class GameService {
       .then(ref => {
         this.playerOne = this.players.find(i => i.id === this.playerOne.id);
         this.playerOneChanged.next(this.playerOne);
+        this.sessionSub.unsubscribe();
         console.log("---debug-resetPlayerOneGameSession");
       });
   }
 
+  /**
+   *in case a game has been canceled by the opponent,
+   *only the own client has to be cleaned up
+   */
+  cleanUpAbortedSession() {
+    this.gameSession = null;
+    this.sessionChanged.next(this.gameSession);
+    this.playerTwo = null;
+    this.playerTwoChanged.next(this.playerTwo);
+    console.log("---debug-cleanUpAbortedSession");
+  }
+
   resetLastChosenOnPlayers() {
-    this.db.collection('players').doc(this.playerOne.id).update({lastChosen: null})
+    this.db.collection('players').doc(this.playerOne.id).update({lastChosen: ''})
       .then(ref => {
-        this.playerOne.lastChosen = null;
+        this.playerOne.lastChosen = '';
         this.playerOneChanged.next(this.playerOne);
       });
-    //TODO reenable after debug
-    // this.db.collection('players').doc(this.playerTwo.id).update({lastChosen: null})
-    //   .then(ref => {
-    //     this.playerTwo.lastChosen = null;
-    //     this.playerTwoChanged.next(this.playerTwo);
-    //   });
+    this.db.collection('players').doc(this.playerTwo.id).update({lastChosen: ''})
+      .then(ref => {
+        this.playerTwo.lastChosen = '';
+        this.playerTwoChanged.next(this.playerTwo);
+      });
     console.log("---debug-resetLastChosenOnPlayers");
   }
 

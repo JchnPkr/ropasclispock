@@ -1,18 +1,18 @@
 <div fxLayout="column" fxLayoutAlign="center center"
      *ngIf="playerOne && (playerOne.state != 'requested')">
-  <h2>Choose a player to start a new Game, or wait till you are invited.</h2>
+  <h4>Choose a player to start a new Game, or wait till you are invited.</h4>
   <hr>
 </div>
 <div fxLayout="column" fxLayoutAlign="center center"
      *ngIf="playerTwo && playerOne && (playerOne.state === 'requested')">
-  <h2>You have been requested for a game by {{ playerTwo.name }}</h2>
+  <h4>You have been requested for a game by {{ playerTwo.name }}</h4>
   <hr>
   <mat-button-toggle-group (change)="onSubmit($event)">
     <mat-button-toggle value="accept">accept</mat-button-toggle>
     <mat-button-toggle value="decline">decline</mat-button-toggle>
   </mat-button-toggle-group>
 </div>
-<br><br>
+<br>
 <div class="row" fxLayout="column" fxLayoutAlign="center center">
   <div class="col-md-5">
     <app-opponent

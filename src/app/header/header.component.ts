@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { AuthService } from '../auth/auth.service';
+import { GameService } from '../game/game.service';
 
 @Component({
   selector: 'app-header',
@@ -9,7 +10,8 @@ import { AuthService } from '../auth/auth.service';
 })
 export class HeaderComponent implements OnInit {
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService,
+              private gameService: GameService) { }
 
   ngOnInit() {
   }

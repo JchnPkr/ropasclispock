@@ -3,8 +3,8 @@
   grid-template-columns: 1fr 1fr;
 }
 
-.player-content {
-  font-size: 20px;
+.mat-list-base .mat-list-item {
+    font-size: 23px;
 }
 
 .player-text {

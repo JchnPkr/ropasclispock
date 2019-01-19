@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
+import { Router } from '@angular/router';
 
 import { GameService } from 'src/app/game/game.service';
 import {GameSession} from 'src/app/game/gameSession.model';
@@ -15,7 +16,8 @@ export class GameComponent implements OnInit {
 
   isDisabled = false;
 
-  constructor(private gService: GameService) {}
+  constructor(private gService: GameService,
+              private router: Router) {}
 
   ngOnInit() {
     this.sessionSubscription = this.gService.sessionChanged.subscribe(
@@ -35,5 +37,15 @@ export class GameComponent implements OnInit {
   onReset() {
     this.gService.resetGame();
     this.isDisabled = false;
+  }
+
+  onCancel() {
+    this.router.navigate(['/opponentList'])
+    this.gService.resetGameSession();
+  }
+
+  onReturn() {
+    this.gService.cleanUpAbortedSession();
+    this.router.navigate(['/opponentList'])
   }
 }

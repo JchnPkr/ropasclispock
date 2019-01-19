@@ -52,6 +52,10 @@ $candy-app-theme: mat-light-theme($candy-app-primary, $candy-app-accent, $candy-
      background-color: mat-color($accent);
   }
 
+  .mat-spinner circle {
+    stroke: mat-color($primary);
+  }
+
   .opponent-item {
     color: mat-color($accent, darker-contrast);
     background-color: mat-color($accent);

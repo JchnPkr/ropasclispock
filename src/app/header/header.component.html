@@ -35,6 +35,22 @@
          class="navbar-brand">Home
       </a>
     </div>
+    <ul class="nav navbar-nav pull-left">
+      <ng-template [ngIf]="authService.isAuth()">
+        <li role="presentation"
+            routerLinkActive="active">
+          <a class="nav-link"
+             routerLink="/opponentList">Opponents</a>
+        </li>
+      </ng-template>
+      <ng-template [ngIf]="gameService.gameSession">
+        <li role="presentation"
+            routerLinkActive="active">
+          <a class="nav-link"
+             [routerLink]="'/game/' + [gameService.gameSession.gId]">Game</a>
+        </li>
+      </ng-template>
+    </ul>
       <ul class="nav navbar-nav pull-right">
         <ng-template [ngIf]="!authService.isAuth()">
           <li role="presentation"

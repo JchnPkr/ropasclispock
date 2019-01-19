@@ -42,6 +42,8 @@ export class OpponentListComponent implements OnInit, OnDestroy {
         this.playerTwo = player;
       }
     );
+
+    this.opponentList = this.gameService.players;
   }
 
   onSubmit(event: any) {
@@ -49,7 +51,7 @@ export class OpponentListComponent implements OnInit, OnDestroy {
       this.router.navigate(['game/' + this.gameService.gameSession.gId]);
     }
     else if(event.value === 'decline') {
-      this.gameService.declineGame();
+      this.gameService.resetGameSession();
     }
   }
 

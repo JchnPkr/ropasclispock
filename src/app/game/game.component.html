@@ -1,12 +1,24 @@
   <div class="row">
     <div class="col">
-      <app-player></app-player>
+      <app-player *ngIf="gameSession"></app-player>
+      <ng-template [ngIf]="!gameSession">
+        <div fxLayout="column" fxLayoutAlign="center center">
+          <h4>Your opponent has left the game!</h4>
+          <br>
+          <p>Click below to return to the List of available players.</p>
+          <br>
+          <button mat-raised-button color="accent" (click)="onReturn()">
+            <mat-icon class="black-icon">arrow_back</mat-icon>
+          </button>
+        </div>
+      </ng-template>
     </div>
   </div>
   <hr>
-  <div class="row">
-    <div class="col">
-      <div class="btn-toolbar justify-content-center" role="toolbar" aria-label="Toolbar with button groups">
+  <div fxLayout="row">
+    <div fxFlex="10">
+    </div>
+      <div fxFlex="80" fxLayoutAlign="center center">
         <mat-button-toggle-group (change)="onSubmit($event)" [disabled]="isDisabled">
           <mat-button-toggle value="rock">
             <i class="fas fa-hand-rock fa-3x"></i>
@@ -25,6 +37,10 @@
           </mat-button-toggle>
         </mat-button-toggle-group>
       </div>
+    <div fxFlex="10" fxLayoutAlign="end center">
+      <button mat-raised-button color="accent" (click)="onCancel()">
+        <mat-icon class="black-icon">cancel</mat-icon>
+      </button>
     </div>
   </div>
 <div fxLayout="column" fxLayoutAlign="center center"
