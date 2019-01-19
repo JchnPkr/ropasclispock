@@ -41,11 +41,15 @@ export class GameComponent implements OnInit {
 
   onCancel() {
     this.router.navigate(['/opponentList'])
-    this.gService.resetGameSession();
+      .then(res => {
+        this.gService.resetGameSession();
+      });
   }
 
   onReturn() {
-    this.gService.cleanUpAbortedSession();
     this.router.navigate(['/opponentList'])
+      .then(res => {
+        this.gService.cleanUpAbortedSession();
+      });
   }
 }
