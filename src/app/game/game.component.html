@@ -5,9 +5,9 @@
         <div fxLayout="column" fxLayoutAlign="center center">
           <h4>Your opponent has left the game!</h4>
           <br>
-          <p>Click below to return to the List of available players.</p>
-          <br>
-          <button mat-raised-button color="accent" (click)="onReturn()">
+          <button mat-raised-button color="accent"
+                  matTooltip="return to opponent list"
+                  (click)="onReturn()">
             <mat-icon class="black-icon">arrow_back</mat-icon>
           </button>
         </div>
@@ -38,7 +38,9 @@
         </mat-button-toggle-group>
       </div>
     <div fxFlex="10" fxLayoutAlign="end center">
-      <button mat-raised-button color="accent" (click)="onCancel()">
+      <button mat-raised-button color="accent"
+              matTooltip="leave current game"
+              (click)="onCancel()">
         <mat-icon class="black-icon">cancel</mat-icon>
       </button>
     </div>
@@ -46,7 +48,9 @@
 <div fxLayout="column" fxLayoutAlign="center center"
      *ngIf="gameSession && gameSession.result">
   <h2>{{ gameSession.result }}</h2>
-  <button mat-raised-button color="accent" (click)="onReset()">
+  <button mat-raised-button color="accent"
+          matTooltip="play next round"
+          (click)="onReset()">
     <mat-icon class="black-icon">refresh</mat-icon>
   </button>
 </div>

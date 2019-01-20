@@ -17,7 +17,9 @@ import { MatButtonModule,
          MatTableModule,
          MatSortModule,
          MatPaginatorModule,
-         MatButtonToggleModule
+         MatButtonToggleModule,
+         MatExpansionModule,
+         MatTooltipModule
         } from '@angular/material';
 
 @NgModule({
@@ -40,7 +42,9 @@ import { MatButtonModule,
     MatTableModule,
     MatSortModule,
     MatPaginatorModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatExpansionModule,
+    MatTooltipModule
     ],
   exports: [
     MatButtonModule,
@@ -61,7 +65,9 @@ import { MatButtonModule,
     MatTableModule,
     MatSortModule,
     MatPaginatorModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatExpansionModule,
+    MatTooltipModule
   ]
 })
 export class MaterialModule {

@@ -1,4 +1,16 @@
-.mat-card {
+.mat-expansion-panel {
   background-color: #ffb84d;
   margin: 1em;
+}
+
+.mat-expansion-panel-header-description, .mat-expansion-panel-header-title {
+  flex-basis: auto;
+  height: 63px;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.mat-expansion-panel-header-description {
+  font-size: 20px;
 }
