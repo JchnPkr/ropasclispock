@@ -60,6 +60,7 @@ export class GameService {
         console.log("---debug: Fetched players! ", JSON.parse(JSON.stringify(this.players)));
 
         this.updatePlayerOne();
+        this.updatePlayerTwo();
       }));
   }
 
@@ -93,6 +94,14 @@ export class GameService {
             console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
           }
         });
+    }
+  }
+
+  updatePlayerTwo() {
+    if(this.playerTwo && this.gameSession) {
+      this.playerTwo = this.players.find(i => i.id === this.gameSession.pTwoId);
+      this.playerTwoChanged.next(this.playerTwo);
+      console.log("---debug-updatePlayerTwo: ", JSON.parse(JSON.stringify(this.playerTwo)));
     }
   }
 
@@ -212,8 +221,15 @@ export class GameService {
 
   resetApp() {
     this.cancelSubscriptions();
-    this.resetGameSession();
-    return this.resetPlayers();
+    return this.resetGameSession()
+      .then(ref => {
+          return this.resetClientsidePlayersAndRemovePlayerFromDB();
+      });
+  }
+
+  cancelSubscriptions() {
+  this.fbSubs.forEach(sub => sub.unsubscribe());
+    console.log("---debug-cancelSubscriptions");
   }
 
   /**
@@ -221,23 +237,53 @@ export class GameService {
    *and session data in DB
    */
   resetGameSession() {
+    this.sessionSub.unsubscribe();
     if(this.gameSession) {
-      this.db.collection('games').doc(this.gameSession.gId).delete()
+      return this.db.collection('games').doc(this.gameSession.gId).delete()
         .then(ref => {
-          console.log('---debug-reset-session');
+          console.log('---debug-resetGameSession');
           this.gameSession = null;
           this.sessionChanged.next(this.gameSession);
-          this.resetPlayerTwo();
-          this.resetPlayerOneGameSession();
+          return this.resetPlayerTwo()
+            .then(ref => {
+              return this.resetPlayerOneGameSession();
+            });
         });
+    }
+    else {
+      var promise = new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          console.log("---debug-resetGameSession: session already null! resolved anyways!");
+          resolve();
+          }, 1);
+        });
+      return promise;
     }
   }
 
-  resetPlayers() {
+  resetPlayerTwo() {
+    return this.db.collection('players').doc(this.playerTwo.id).update({gameId: null, lastChosen: '', state: 'waiting'})
+      .then(ref => {
+        this.playerTwo = null;
+        this.playerTwoChanged.next(this.playerTwo);
+        console.log("---debug-resetPlayerTwo");
+      });
+  }
+
+  resetPlayerOneGameSession() {
+    return this.db.collection('players').doc(this.playerOne.id).update({gameId: null, lastChosen: '', state: 'waiting'})
+      .then(ref => {
+        this.playerOne = this.players.find(i => i.id === this.playerOne.id);
+        this.playerOneChanged.next(this.playerOne);
+        console.log("---debug-resetPlayerOneGameSession");
+      });
+  }
+
+  resetClientsidePlayersAndRemovePlayerFromDB() {
     if(this.playerOne) {
       return this.db.collection('players').doc(this.playerOne.id).delete()
         .then(ref => {
-          console.log('---debug-reset-players');
+          console.log('---debug-resetPlayers');
           this.playerOne = null;
           this.playerTwo = null;
       });
@@ -245,7 +291,7 @@ export class GameService {
     else {
       var promise = new Promise<void>((resolve, reject) => {
         setTimeout(() => {
-        console.log("---debug: playerOne already null! resolved anyways!");
+        console.log("---debug-resetPlayers: playerOne already null! resolved anyways!");
         resolve();
         }, 1);
       });
@@ -260,25 +306,6 @@ export class GameService {
         this.sessionChanged.next(this.gameSession);
         console.log("---debug-resetGame");
         this.resetLastChosenOnPlayers();
-      });
-  }
-
-  resetPlayerTwo() {
-    this.db.collection('players').doc(this.playerTwo.id).update({gameId: null, state: 'waiting'})
-      .then(ref => {
-        this.playerTwo = null;
-        this.playerTwoChanged.next(this.playerTwo);
-        console.log("---debug-resetPlayerTwo");
-      });
-  }
-
-  resetPlayerOneGameSession() {
-    this.db.collection('players').doc(this.playerOne.id).update({gameId: null, state: 'waiting'})
-      .then(ref => {
-        this.playerOne = this.players.find(i => i.id === this.playerOne.id);
-        this.playerOneChanged.next(this.playerOne);
-        this.sessionSub.unsubscribe();
-        console.log("---debug-resetPlayerOneGameSession");
       });
   }
 
@@ -306,10 +333,5 @@ export class GameService {
         this.playerTwoChanged.next(this.playerTwo);
       });
     console.log("---debug-resetLastChosenOnPlayers");
-  }
-
-  cancelSubscriptions() {
-  this.fbSubs.forEach(sub => sub.unsubscribe());
-    console.log("---debug-cancelSubscriptions");
   }
 }

@@ -25,9 +25,7 @@ export class AuthService {
             this.router.navigate(['/opponentList']);
           }
           else {
-            this.gService.cancelSubscriptions();
             this.authChange.next(false);
-            this.router.navigate(['/']);
             this.isAuthenticated = false;
           }
         }
@@ -62,9 +60,12 @@ export class AuthService {
   }
 
   logOut() {
-    this.gService.resetApp()
+    this.router.navigate(['/'])
       .then(ref => {
-        this.afAuth.auth.signOut();
+        this.gService.resetApp()
+          .then(ref => {
+            this.afAuth.auth.signOut();
+          });
       });
   }
 }

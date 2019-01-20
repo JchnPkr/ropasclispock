@@ -11,10 +11,9 @@ import { GameService } from '../game/game.service';
 export class HeaderComponent implements OnInit {
 
   constructor(private authService: AuthService,
-              private gameService: GameService) { }
+              private gameService: GameService) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   onLogout() {
     this.authService.logOut();

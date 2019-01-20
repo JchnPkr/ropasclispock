@@ -15,7 +15,7 @@
           <mat-list-item> <strong>Wins:</strong><span class="player-text"> {{ playerTwo.winCount }} </span></mat-list-item>
           <mat-list-item>
             <strong>Last chosen:</strong>
-            <div *ngIf="playerTwo.lastChosen != ''">
+            <div *ngIf="playerTwo.lastChosen != '' && playerOne.lastChosen != ''">
               <span class="player-text"> {{ playerTwo.lastChosen }} </span>
             </div>
               <mat-spinner *ngIf="playerTwo.lastChosen === ''">pending...</mat-spinner>
