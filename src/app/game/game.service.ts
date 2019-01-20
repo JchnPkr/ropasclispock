@@ -322,16 +322,21 @@ export class GameService {
   }
 
   resetLastChosenOnPlayers() {
-    this.db.collection('players').doc(this.playerOne.id).update({lastChosen: ''})
-      .then(ref => {
-        this.playerOne.lastChosen = '';
-        this.playerOneChanged.next(this.playerOne);
-      });
-    this.db.collection('players').doc(this.playerTwo.id).update({lastChosen: ''})
-      .then(ref => {
-        this.playerTwo.lastChosen = '';
-        this.playerTwoChanged.next(this.playerTwo);
-      });
-    console.log("---debug-resetLastChosenOnPlayers");
+    if(this.playerOne.lastChosen != '') {
+      this.db.collection('players').doc(this.playerOne.id).update({lastChosen: ''})
+        .then(ref => {
+          this.playerOne.lastChosen = '';
+          this.playerOneChanged.next(this.playerOne);
+        });
+      this.db.collection('players').doc(this.playerTwo.id).update({lastChosen: ''})
+        .then(ref => {
+          this.playerTwo.lastChosen = '';
+          this.playerTwoChanged.next(this.playerTwo);
+        });
+      console.log("---debug-resetLastChosenOnPlayers");
+    }
+    else {
+      console.log("---debug-resetLastChosenOnPlayers: Last choice already reset. Nothing to do.");
+    }
   }
 }

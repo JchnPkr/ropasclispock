@@ -19,20 +19,22 @@
     <div fxFlex="10">
     </div>
       <div fxFlex="80" fxLayoutAlign="center center">
-        <mat-button-toggle-group (change)="onSubmit($event)" [disabled]="isDisabled">
-          <mat-button-toggle value="rock">
+        <mat-button-toggle-group (change)="onSubmit($event)"
+                                 [disabled]="isDisabled"
+                                 [(ngModel)]="groupModelCheckedMarker">
+          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="rock">
             <i class="fas fa-hand-rock fa-3x"></i>
           </mat-button-toggle>
-          <mat-button-toggle value="paper">
+          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="paper">
             <i class="fas fa-hand-paper fa-3x"></i>
           </mat-button-toggle>
-          <mat-button-toggle value="scissors">
+          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="scissors">
             <i class="fas fa-hand-scissors fa-3x"></i>
           </mat-button-toggle>
-          <mat-button-toggle value="lizard">
+          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="lizard">
             <i class="fas fa-hand-lizard fa-3x"></i>
           </mat-button-toggle>
-          <mat-button-toggle value="spock">
+          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="spock">
             <i class="fas fa-hand-spock fa-3x"></i>
           </mat-button-toggle>
         </mat-button-toggle-group>

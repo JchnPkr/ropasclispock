@@ -18,7 +18,10 @@
             <div *ngIf="playerTwo.lastChosen != '' && playerOne.lastChosen != ''">
               <span class="player-text"> {{ playerTwo.lastChosen }} </span>
             </div>
-              <mat-spinner *ngIf="playerTwo.lastChosen === ''">pending...</mat-spinner>
+            <mat-spinner *ngIf="playerTwo.lastChosen === ''">pending...</mat-spinner>
+            <div *ngIf="playerTwo.lastChosen != '' && playerOne.lastChosen === ''">
+              <mat-icon class="black-icon">check_circle</mat-icon>
+            </div>
           </mat-list-item>
         </mat-list>
     </mat-card-content>
