@@ -3,7 +3,7 @@
     <mat-card-content>
         <mat-list>
           <mat-list-item> <strong>Player:</strong><span class="player-text"> {{ playerOne.name }} </span></mat-list-item>
-          <mat-list-item> <strong>Wins:</strong><span class="player-text"> {{ playerOne.winCount }} </span></mat-list-item>
+          <mat-list-item> <strong >Wins:</strong><span class="player-text"> {{ playerOne.winCount }} </span></mat-list-item>
           <mat-list-item> <strong>Last chosen:</strong><span class="player-text"> {{ playerOne.lastChosen }} </span></mat-list-item>
         </mat-list>
     </mat-card-content>
@@ -18,7 +18,9 @@
             <div *ngIf="playerTwo.lastChosen != '' && playerOne.lastChosen != ''">
               <span class="player-text"> {{ playerTwo.lastChosen }} </span>
             </div>
-            <mat-spinner *ngIf="playerTwo.lastChosen === ''">pending...</mat-spinner>
+            <div class="spinner-div">
+              <mat-spinner *ngIf="playerTwo.lastChosen === ''" [diameter]="24">pending...</mat-spinner>
+            </div>
             <div *ngIf="playerTwo.lastChosen != '' && playerOne.lastChosen === ''">
               <mat-icon class="black-icon">check_circle</mat-icon>
             </div>

@@ -114,15 +114,33 @@ export class GameService {
   }
 
   startNewGame(pTwo: Player) {
+    if(pTwo.id === this.playerOne.id) {
+      this.enableAI();
+    }
+    else {
+      return this.updatePlayerOneStateInGame('inGame')
+        .then(res => {
+          return this.addPlayerTwoToGame(pTwo)
+            .then(res => {
+              return this.createGameSession()
+                .then(res => {
+                  return this.updateGameIdOnPlayers();
+                });
+            });
+        });
+    }
+  }
+
+  enableAI() {
     return this.updatePlayerOneStateInGame('inGame')
       .then(res => {
-        return this.addPlayerTwoToGame(pTwo)
-          .then(res => {
-            return this.createGameSession()
-              .then(res => {
-                return this.updateGameIdOnPlayers();
-              });
-          });
+        // this.isAIenabled = true;
+        // ---
+        // //create aiPlayerTwo
+        // return this.createGameSession()
+        //   .then(res => {
+        //     return this.updateGameIdOnPlayers();
+        //   });
       });
   }
 
@@ -141,7 +159,7 @@ export class GameService {
         this.playerTwo = this.players.find(i => i.id === pTwo.id);
         this.playerTwoChanged.next(this.playerTwo);
         console.log("---debug-addPlayerTwo: ", JSON.parse(JSON.stringify(this.playerTwo)));
-      });
+    });
   }
 
   createGameSession() {
