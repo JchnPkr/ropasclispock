@@ -10,7 +10,7 @@ import { PlayerImpl } from 'src/app/player/player.model';
 @Injectable()
 export class AuthService {
   authChange = new Subject<boolean>();
-  private isAuthenticated: boolean;
+  isAuthenticated: boolean;
 
     constructor(private router: Router,
                 private afAuth: AngularFireAuth,

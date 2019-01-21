@@ -36,23 +36,23 @@
       </a>
     </div>
     <ul class="nav navbar-nav pull-left">
-      <ng-template [ngIf]="authService.isAuth()">
+      <ng-template [ngIf]="isAuth">
         <li role="presentation"
             routerLinkActive="active">
           <a class="nav-link"
              routerLink="/opponentList">Opponents</a>
         </li>
       </ng-template>
-      <ng-template [ngIf]="gameService.gameSession">
+      <ng-template [ngIf]="gameSession">
         <li role="presentation"
             routerLinkActive="active">
           <a class="nav-link"
-             [routerLink]="'/game/' + [gameService.gameSession.gId]">Game</a>
+             [routerLink]="'/game/' + [gameSession.gId]">Game</a>
         </li>
       </ng-template>
     </ul>
       <ul class="nav navbar-nav pull-right">
-        <ng-template [ngIf]="!authService.isAuth()">
+        <ng-template [ngIf]="isAuth">
           <li role="presentation"
               routerLinkActive="active">
             <a class="nav-link"
@@ -69,7 +69,7 @@
           <a class="nav-link"
              style= "cursor: pointer"
              (click)="onLogout()"
-             *ngIf="authService.isAuth()">Logout</a>
+             *ngIf="isAuth">Logout</a>
         </li>
       </ul>
     </div>
