@@ -5,11 +5,13 @@ import { Subject } from 'rxjs/Subject';
 import { map } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-import { Player } from '../player/player.model';
+import { Player, PlayerImpl } from '../player/player.model';
 import { GameSession, GameSessionImpl } from './gameSession.model';
 
 @Injectable()
 export class GameService {
+  isAIenabled = false;
+
   playerOne: Player;
   playerOneChanged = new Subject<Player>();
 
@@ -134,14 +136,38 @@ export class GameService {
   enableAI() {
     return this.updatePlayerOneStateInGame('inGame')
       .then(res => {
-        // this.isAIenabled = true;
-        // ---
-        // //create aiPlayerTwo
-        // return this.createGameSession()
-        //   .then(res => {
-        //     return this.updateGameIdOnPlayers();
-        //   });
+        this.isAIenabled = true;
+        this.createAIPlayerTwo();
+        this.createLocalGameSession()
+        this.updateAIGameIdOnPlayers();
+        return this.createEmptyPromise('enableAI Promise return');
       });
+  }
+
+  createAIPlayerTwo() {
+    this.playerTwo = new PlayerImpl('AllbutIntelligent');
+    this.playerTwo.id = 'playerAId'
+    this.playerTwoChanged.next(this.playerTwo);
+  }
+
+  createLocalGameSession() {
+    this.gameSession = new GameSessionImpl('sessionAId', this.playerOne.id, this.playerTwo.id);
+    this.sessionChanged.next(this.gameSession);
+  }
+
+  updateAIGameIdOnPlayers() {
+    this.playerOne.gameId = this.gameSession.gId;
+    this.playerTwo.gameId = this.gameSession.gId;
+  }
+
+  createEmptyPromise(logMessage: string) {
+    var promise = new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        console.log("---debug-createEmptyPromise: " + logMessage);
+        resolve();
+        }, 1);
+      });
+    return promise;
   }
 
   updatePlayerOneStateInGame(state: string) {
@@ -269,13 +295,7 @@ export class GameService {
         });
     }
     else {
-      var promise = new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          console.log("---debug-resetGameSession: session already null! resolved anyways!");
-          resolve();
-          }, 1);
-        });
-      return promise;
+      return this.createEmptyPromise('resetGameSession: session already null! resolved anyways!');
     }
   }
 
@@ -307,13 +327,7 @@ export class GameService {
       });
     }
     else {
-      var promise = new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-        console.log("---debug-resetPlayers: playerOne already null! resolved anyways!");
-        resolve();
-        }, 1);
-      });
-      return promise;
+      return this.createEmptyPromise('resetPlayers: playerOne already null! resolved anyways!');
     }
   }
 
