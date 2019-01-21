@@ -11,6 +11,7 @@ import { GameSession, GameSessionImpl } from './gameSession.model';
 @Injectable()
 export class GameService {
   isAIenabled = false;
+  possibleChoices: string[] = ['rock', 'paper', 'scissors', 'lizard', 'spock'];
 
   playerOne: Player;
   playerOneChanged = new Subject<Player>();
@@ -116,8 +117,11 @@ export class GameService {
   }
 
   startNewGame(pTwo: Player) {
+    console.log("---debug-startNewGame: ", JSON.parse(JSON.stringify(this.playerOne)),
+                                           JSON.parse(JSON.stringify(pTwo)));
+
     if(pTwo.id === this.playerOne.id) {
-      this.enableAI();
+      return this.enableAI();
     }
     else {
       return this.updatePlayerOneStateInGame('inGame')
@@ -151,7 +155,8 @@ export class GameService {
   }
 
   createLocalGameSession() {
-    this.gameSession = new GameSessionImpl('sessionAId', this.playerOne.id, this.playerTwo.id);
+    var gameId = this.playerOne.name + 'VsAI';
+    this.gameSession = new GameSessionImpl(gameId, this.playerOne.id, this.playerTwo.id);
     this.sessionChanged.next(this.gameSession);
   }
 
@@ -215,26 +220,62 @@ export class GameService {
   }
 
   updatePlayerOneChoiceAndTryEvaluate(choice: string) {
-    console.log('---debug-update-choice: ' + choice);
-    this.db.collection('players').doc(this.playerOne.id).update({lastChosen: choice})
+    console.log('---debug-updatePlayerOneChoiceAndTryEvaluate: ' + choice);
+
+    if(this.isAIenabled) {
+      this.evaluateResultAI(choice);
+    }
+    else {
+      this.updatePlayerChoiceInDB(choice)
+        .then(ref => {
+          if(this.playerTwo.lastChosen != '') {
+            let result = this.evaluateWinner();
+            this.updateGameResultInDB(result);
+          }
+        });
+    }
+  }
+
+  evaluateResultAI(choice: string) {
+    this.updatePlayerChoiceAIGame(choice);
+    var generatedChoice = this.generateRandomChoiceOnAIPlayer();
+    this.updateChoiceAIPlayer(generatedChoice);
+    let result = this.evaluateWinner();
+    this.updateAIGameResult(result);
+  }
+
+  updatePlayerChoiceAIGame(choice: string) {
+    this.playerOne.lastChosen = choice;
+    this.playerOneChanged.next(this.playerOne);
+  }
+
+  generateRandomChoiceOnAIPlayer() {
+    var randomIndex = this.generateRandomNatFromZeroTillMax(5);
+    return this.possibleChoices[randomIndex];
+  }
+
+  generateRandomNatFromZeroTillMax(max: number) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
+  updateChoiceAIPlayer(generatedChoice) {
+    this.playerTwo.lastChosen = generatedChoice;
+    this.playerTwoChanged.next(this.playerTwo);
+  }
+
+  updatePlayerChoiceInDB(choice: string) {
+    return this.db.collection('players').doc(this.playerOne.id).update({lastChosen: choice})
       .then(ref => {
         this.playerOne.lastChosen = choice;
         this.playerOneChanged.next(this.playerOne);
-
-        if(this.playerTwo.lastChosen != '') {
-          let result = this.evaluateWinner();
-          this.db.collection('games').doc(this.gameSession.gId).update({result: result})
-            .then(ref => {
-              this.gameSession.result = result;
-              this.sessionChanged.next(this.gameSession);
-            });
-        }
       });
   }
 
   evaluateWinner() {
+    console.log("---debug-evaluateWinner");
+
     if(!this.playerOne.lastChosen || !this.playerTwo.lastChosen) {
-      console.log("---debug: could not evaluate winner!",
+      console.error("---error: could not evaluate winner!",
         JSON.parse(JSON.stringify(this.playerOne)),
         JSON.parse(JSON.stringify(this.playerTwo)));
     }
@@ -263,9 +304,22 @@ export class GameService {
     }
   }
 
+  updateAIGameResult(result: string) {
+      this.gameSession.result = result;
+      this.sessionChanged.next(this.gameSession);
+  }
+
+  updateGameResultInDB(result: string) {
+    this.db.collection('games').doc(this.gameSession.gId).update({result: result})
+      .then(ref => {
+        this.gameSession.result = result;
+        this.sessionChanged.next(this.gameSession);
+      });
+  }
+
   resetApp() {
     this.cancelSubscriptions();
-    return this.resetGameSession()
+    return this.cancelGameSession()
       .then(ref => {
           return this.resetClientsidePlayersAndRemovePlayerFromDB();
       });
@@ -277,15 +331,47 @@ export class GameService {
   }
 
   /**
-   *this method resets the calling client side
-   *and session data in DB
+   *this method resets the client side which initiated
+   *the game session and deletes the session data in DB
    */
-  resetGameSession() {
+  cancelGameSession() {
+    console.log('---debug-cancelGameSession:');
+
+    if(this.isAIenabled) {
+      return this.disableAI();
+    }
+    else {
+      return this.cancelGamesSessionInDB();
+    }
+  }
+
+  disableAI() {
+    console.log('---debug-disableAI');
+    this.isAIenabled = false;
+    this.resetAISession();
+    this.resetAIPlayer();
+    return this.resetPlayerOneGameSession();
+  }
+
+  resetAISession() {
+    console.log('---debug-resetAISession');
+    this.gameSession = null;
+    this.sessionChanged.next(this.gameSession);
+  }
+
+  resetAIPlayer() {
+    console.log('---debug-resetAIPlayer');
+    this.playerTwo = null;
+    this.playerTwoChanged.next(this.playerTwo);
+  }
+
+  cancelGamesSessionInDB() {
     this.sessionSub.unsubscribe();
+
     if(this.gameSession) {
       return this.db.collection('games').doc(this.gameSession.gId).delete()
         .then(ref => {
-          console.log('---debug-resetGameSession');
+          console.log('---debug-cancelGameSession');
           this.gameSession = null;
           this.sessionChanged.next(this.gameSession);
           return this.resetPlayerTwo()
@@ -332,12 +418,40 @@ export class GameService {
   }
 
   resetGame() {
-    this.db.collection('games').doc(this.gameSession.gId).update({result: null})
+    console.log("---debug-resetGame");
+
+    if(this.isAIenabled) {
+      this.resetAIGameResult();
+      this.resetLastChosenOnPlayersAI();
+    }
+    else {
+      this.resetGameResultInDB()
+        .then(ref => {
+          this.resetLastChosenOnPlayers();
+        });
+    }
+  }
+
+  resetAIGameResult() {
+    this.gameSession.result = null;
+    this.sessionChanged.next(this.gameSession);
+    console.log("---debug-resetAIGameResult");
+  }
+
+  resetLastChosenOnPlayersAI() {
+    console.log("---debug-resetLastChosenOnPlayersAI");
+    this.playerOne.lastChosen = '';
+    this.playerOneChanged.next(this.playerOne);
+    this.playerTwo.lastChosen = '';
+    this.playerTwoChanged.next(this.playerTwo);
+  }
+
+  resetGameResultInDB() {
+    return this.db.collection('games').doc(this.gameSession.gId).update({result: null})
       .then(ref => {
         this.gameSession.result = null;
         this.sessionChanged.next(this.gameSession);
-        console.log("---debug-resetGame");
-        this.resetLastChosenOnPlayers();
+        console.log("---debug-resetGameResultInDB");
       });
   }
 
@@ -346,11 +460,11 @@ export class GameService {
    *only the own client has to be cleaned up
    */
   cleanUpAbortedSession() {
+    console.log("---debug-cleanUpAbortedSession");
     this.gameSession = null;
     this.sessionChanged.next(this.gameSession);
     this.playerTwo = null;
     this.playerTwoChanged.next(this.playerTwo);
-    console.log("---debug-cleanUpAbortedSession");
   }
 
   resetLastChosenOnPlayers() {

@@ -51,7 +51,7 @@ export class OpponentListComponent implements OnInit, OnDestroy {
       this.router.navigate(['game/' + this.gameService.gameSession.gId]);
     }
     else if(event.value === 'decline') {
-      this.gameService.resetGameSession();
+      this.gameService.cancelGameSession();
     }
   }
 
