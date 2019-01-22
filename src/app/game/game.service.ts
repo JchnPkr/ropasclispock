@@ -72,36 +72,36 @@ export class GameService {
     this.playerOneChanged.next(this.playerOne);
     console.log("---debug-updatePlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
 
-    this.updateGameSessionFromRequest();
-  }
-
-  updateGameSessionFromRequest() {
     if(this.playerOne.state ==='requested') {
-      var gId = this.playerOne.gameId;
-      this.sessionSub = this.db.collection('games').doc(gId).snapshotChanges()
-        .subscribe(doc => {
-          if(doc.payload.data()) {
-            //gameSession from DB was created by requester, so pOneId of this session is pTwoId
-            //for this client actually
-            // console.log("---debug-updateGameSessionFromRequest (doc): ", JSON.parse(JSON.stringify(doc)));
-            var pTwoId = (doc.payload.data() as GameSession).pOneId;
-            this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
-            this.sessionChanged.next(this.gameSession);
-            console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
-
-            this.updatePlayerTwoFromRequest();
-          }
-          else {
-            this.gameSession = null;
-            this.sessionChanged.next(this.gameSession);
-            console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
-          }
-        });
+      this.updateGameSessionFromRequest();
     }
   }
 
+  updateGameSessionFromRequest() {
+    var gId = this.playerOne.gameId;
+    this.sessionSub = this.db.collection('games').doc(gId).snapshotChanges()
+      .subscribe(doc => {
+        if(doc.payload.data()) {
+          //gameSession from DB was created by requester, so pOneId of this session is pTwoId
+          //for this client actually
+          // console.log("---debug-updateGameSessionFromRequest (doc): ", JSON.parse(JSON.stringify(doc)));
+          var pTwoId = (doc.payload.data() as GameSession).pOneId;
+          this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
+          this.sessionChanged.next(this.gameSession);
+          console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
+
+          this.updatePlayerTwoFromRequest();
+        }
+        else {
+          this.gameSession = null;
+          this.sessionChanged.next(this.gameSession);
+          console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
+        }
+      });
+  }
+
   updatePlayerTwo() {
-    if(this.playerTwo && this.gameSession) {
+    if(!this.isAIenabled && this.playerTwo && this.gameSession) {
       this.playerTwo = this.players.find(i => i.id === this.gameSession.pTwoId);
       this.playerTwoChanged.next(this.playerTwo);
       console.log("---debug-updatePlayerTwo: ", JSON.parse(JSON.stringify(this.playerTwo)));
@@ -288,19 +288,37 @@ export class GameService {
        (this.playerOne.lastChosen === 'lizard' && (this.playerTwo.lastChosen === 'paper' ||this.playerTwo.lastChosen === 'spock')) ||
        (this.playerOne.lastChosen === 'spock' && (this.playerTwo.lastChosen === 'rock' || this.playerTwo.lastChosen === 'scissors'))) {
       this.playerOne.winCount++;
-      this.db.collection('players').doc(this.playerOne.id).update({winCount: this.playerOne.winCount})
-        .then(ref => {
-          this.playerOneChanged.next(this.playerOne);
-        });
+      this.updatePlayerOneWinCount();
       return 'Player ' + this.playerOne.name + ' wins!';
     }
     else {
       this.playerTwo.winCount++;
-      this.db.collection('players').doc(this.playerTwo.id).update({winCount: this.playerTwo.winCount})
+      this.updatePlayerTwoWinCount();
+      return 'Player ' + this.playerTwo.name + ' wins!'
+    }
+  }
+
+  updatePlayerOneWinCount() {
+    if(this.isAIenabled) {
+      this.playerOneChanged.next(this.playerOne);
+    }
+    else {
+      this.db.collection('players').doc(this.playerOne.id).update({winCount: this.playerOne.winCount})
         .then(ref => {
           this.playerOneChanged.next(this.playerOne);
         });
-      return 'Player ' + this.playerTwo.name + ' wins!'
+    }
+  }
+
+  updatePlayerTwoWinCount() {
+    if(this.isAIenabled) {
+      this.playerTwoChanged.next(this.playerTwo);
+    }
+    else {
+      this.db.collection('players').doc(this.playerTwo.id).update({winCount: this.playerTwo.winCount})
+        .then(ref => {
+          this.playerTwoChanged.next(this.playerTwo);
+        });
     }
   }
 

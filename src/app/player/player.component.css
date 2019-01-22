@@ -8,15 +8,15 @@
 }
 
 .player-text {
-  /* padding-left: 10px; */
+  padding-left: 10px;
 }
 
 .spinner-div {
   padding-left: 10px;
 }
 
-.strong {
-  padding-right: 10px;
+.mat-icon {
+  padding-left: 10px;
 }
 
 .mat-card {
