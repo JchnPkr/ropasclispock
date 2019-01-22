@@ -48,7 +48,7 @@
     </div>
   </div>
 <div fxLayout="column" fxLayoutAlign="center center"
-     *ngIf="gameSession && gameSession.result">
+     *ngIf="gameSession && gameSession.result && isDisabled">
   <h2>{{ gameSession.result }}</h2>
   <button mat-raised-button color="accent"
           matTooltip="play next round"
