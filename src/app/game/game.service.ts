@@ -126,11 +126,14 @@ export class GameService {
     else {
       return this.updatePlayerOneStateInGame('inGame')
         .then(res => {
-          return this.createGameSession()
+          return this.addPlayerTwoToLocalGame(pTwo)
             .then(res => {
-              return this.updateGameIdPlayerOne()
+              return this.createGameSession()
                 .then(res => {
-                  return this.updatePlayerTwoGameIdAndStateRequested();
+                  return this.updateGameIdPlayerOne()
+                    .then(res => {
+                      return this.updatePlayerTwoGameIdAndStateRequested();
+                    });
                 });
             });
         });
@@ -190,6 +193,13 @@ export class GameService {
         this.playerOneChanged.next(this.playerOne);
         console.log("---debug-updatePlayerOneStateInGame: ", JSON.parse(JSON.stringify(this.playerOne)));
       });
+  }
+
+  addPlayerTwoToLocalGame(pTwo: Player) {
+    this.playerTwo = this.players.find(i => i.id === pTwo.id);
+    this.playerTwoChanged.next(this.playerTwo);
+    console.log("---debug-addPlayerTwoToGame: ", JSON.parse(JSON.stringify(this.playerTwo)));
+    return this.createEmptyPromise('addPlayerTwoToLocalGame');
   }
 
   createGameSession() {
