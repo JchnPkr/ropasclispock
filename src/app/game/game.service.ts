@@ -131,7 +131,8 @@ export class GameService {
             .then(res => {
               return this.createGameSession()
                 .then(res => {
-                  this.updateGameIdPlayerOne()
+                  this.subscribeGameSession();
+                  this.updateGameIdPlayerOne();
                   this.updatePlayerTwoGameIdAndStateRequested();
                 });
             });
@@ -217,13 +218,14 @@ export class GameService {
         if(doc.payload.data()) {
           this.gameSession.result = (doc.payload.data() as GameSession).result;
           this.sessionChanged.next(this.gameSession);
+          console.log("---debug-subscribeGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
         }
         else {
           this.gameSession = null;
           this.sessionChanged.next(this.gameSession);
         }
+        console.log("---debug-subscribeGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
       });
-      console.log("---debug-subscribeGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
   }
 
   updateGameIdPlayerOne() {
@@ -380,7 +382,7 @@ export class GameService {
       return this.disableAI();
     }
     else {
-      return this.cancelGamesSessionInDB();
+      return this.cancelGameSessionInDB();
     }
   }
 
@@ -404,7 +406,7 @@ export class GameService {
     this.playerTwoChanged.next(this.playerTwo);
   }
 
-  cancelGamesSessionInDB() {
+  cancelGameSessionInDB() {
     this.sessionSub.unsubscribe();
 
     if(this.gameSession) {
@@ -500,8 +502,6 @@ export class GameService {
    */
   cleanUpAbortedSession() {
     console.log("---debug-cleanUpAbortedSession");
-    this.gameSession = null;
-    this.sessionChanged.next(this.gameSession);
     this.playerTwo = null;
     this.playerTwoChanged.next(this.playerTwo);
   }

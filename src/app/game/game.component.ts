@@ -45,7 +45,7 @@ export class GameComponent implements OnInit {
     this.router.navigate(['/opponentList'])
       .then(res => {
         this.gService.cancelGameSession()
-          .then(ref => console.log("---debug-Session canceled"))
+          .then(ref => console.log("---debug-onCancel: Session canceled"))
       });
   }
 

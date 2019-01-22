@@ -10,7 +10,7 @@
   </mat-card>
   <mat-card>
     <mat-card-content>
-        <mat-list>
+        <mat-list *ngIf="playerTwo">
           <mat-list-item> <strong>Player:</strong><span class="player-text"> {{ playerTwo.name }} </span></mat-list-item>
           <mat-list-item> <strong>Wins:</strong><span class="player-text"> {{ playerTwo.winCount }} </span></mat-list-item>
           <mat-list-item>
