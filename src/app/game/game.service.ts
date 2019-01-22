@@ -131,10 +131,8 @@ export class GameService {
             .then(res => {
               return this.createGameSession()
                 .then(res => {
-                  return this.updateGameIdPlayerOne()
-                    .then(res => {
-                      return this.updatePlayerTwoGameIdAndStateRequested();
-                    });
+                  this.updateGameIdPlayerOne()
+                  this.updatePlayerTwoGameIdAndStateRequested();
                 });
             });
         });
@@ -199,47 +197,46 @@ export class GameService {
   addPlayerTwoToLocalGame(pTwo: Player) {
     this.playerTwo = this.players.find(i => i.id === pTwo.id);
     this.playerTwoChanged.next(this.playerTwo);
-    console.log("---debug-addPlayerTwoToGame: ", JSON.parse(JSON.stringify(this.playerTwo)));
+    console.log("---debug-addPlayerTwoToLocalGame: ", JSON.parse(JSON.stringify(this.playerTwo)));
     return this.createEmptyPromise('addPlayerTwoToLocalGame');
   }
 
   createGameSession() {
     this.gameSession = new GameSessionImpl('', this.playerOne.id, this.playerTwo.id);
-    console.log("---debug-createGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
     return this.db.collection('games').add({...this.gameSession})
       .then(docRef => {
-        this.updateGameSession(docRef.id);
+        this.gameSession.gId = docRef.id;
+        this.sessionChanged.next(this.gameSession);
+        console.log("---debug-createGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
       });
   }
 
-  updateGameSession(gId: string) {
-    this.db.collection('games').doc(gId).snapshotChanges()
+  subscribeGameSession() {
+    this.sessionSub = this.db.collection('games').doc(this.gameSession.gId).snapshotChanges()
       .subscribe(doc => {
         if(doc.payload.data()) {
-          this.gameSession.gId = doc.payload.id;
           this.gameSession.result = (doc.payload.data() as GameSession).result;
           this.sessionChanged.next(this.gameSession);
-          console.log("---debug-updateGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
         }
         else {
           this.gameSession = null;
           this.sessionChanged.next(this.gameSession);
-          console.log("---debug-updateGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
         }
       });
+      console.log("---debug-subscribeGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
   }
 
   updateGameIdPlayerOne() {
-    return this.db.collection('players').doc(this.playerOne.id).update({gameId: this.gameSession.gId})
+    this.db.collection('players').doc(this.playerOne.id).update({gameId: this.gameSession.gId})
       .then(result => {
         this.playerOne.gameId = this.gameSession.gId;
         this.playerOneChanged.next(this.playerOne);
-        console.log("---debug: PlayerOne gameId update: ", JSON.parse(JSON.stringify(this.playerOne)));
+        console.log("---debug-updateGameIdPlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
       });
   }
 
   updatePlayerTwoGameIdAndStateRequested() {
-    return this.db.collection('players').doc(this.playerTwo.id).update({gameId: this.gameSession.gId, state: 'requested'})
+    this.db.collection('players').doc(this.playerTwo.id).update({gameId: this.gameSession.gId, state: 'requested'})
       .then(result => {
         this.playerTwo = this.players.find(i => i.id === this.playerTwo.id);
         this.playerTwoChanged.next(this.playerTwo);
@@ -376,10 +373,6 @@ export class GameService {
     console.log("---debug-cancelSubscriptions");
   }
 
-  /**
-   *this method resets the client side which initiated
-   *the game session and deletes the session data in DB
-   */
   cancelGameSession() {
     console.log('---debug-cancelGameSession:');
 
