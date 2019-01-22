@@ -87,6 +87,7 @@ export class GameService {
           // console.log("---debug-updateGameSessionFromRequest (doc): ", JSON.parse(JSON.stringify(doc)));
           var pTwoId = (doc.payload.data() as GameSession).pOneId;
           this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
+          this.gameSession.result = (doc.payload.data() as GameSession).result;
           this.sessionChanged.next(this.gameSession);
           console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
 
@@ -204,11 +205,27 @@ export class GameService {
 
   createGameSession() {
     this.gameSession = new GameSessionImpl('', this.playerOne.id, this.playerTwo.id);
+    console.log("---debug-createGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
     return this.db.collection('games').add({...this.gameSession})
-      .then(ref => {
-        this.gameSession.gId = ref.id;
-        this.sessionChanged.next(this.gameSession);
-        console.log("---debug-createGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
+      .then(docRef => {
+        this.updateGameSession(docRef.id);
+      });
+  }
+
+  updateGameSession(gId: string) {
+    this.db.collection('games').doc(gId).snapshotChanges()
+      .subscribe(doc => {
+        if(doc.payload.data()) {
+          this.gameSession.gId = doc.payload.id;
+          this.gameSession.result = (doc.payload.data() as GameSession).result;
+          this.sessionChanged.next(this.gameSession);
+          console.log("---debug-updateGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
+        }
+        else {
+          this.gameSession = null;
+          this.sessionChanged.next(this.gameSession);
+          console.log("---debug-updateGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
+        }
       });
   }
 
