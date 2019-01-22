@@ -52,7 +52,7 @@
       </ng-template>
     </ul>
       <ul class="nav navbar-nav pull-right">
-        <ng-template [ngIf]="isAuth">
+        <ng-template [ngIf]="!isAuth">
           <li role="presentation"
               routerLinkActive="active">
             <a class="nav-link"
