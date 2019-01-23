@@ -18,7 +18,7 @@
   <div fxLayout="row">
     <div fxFlex="10">
     </div>
-      <div fxFlex="80" fxLayoutAlign="center center">
+      <div fxFlex fxLayoutAlign="center center">
         <mat-button-toggle-group (change)="onSubmit($event)"
                                  [disabled]="isDisabled"
                                  [(ngModel)]="groupModelCheckedMarker">
@@ -49,11 +49,7 @@
   </div>
 <div fxLayout="column" fxLayoutAlign="center center"
      *ngIf="(gameSession && gameSession.result)">
-  <h2>{{ gameSession.result }}</h2>
-</div>
-<div fxLayout="column" fxLayoutAlign="center center"
-     *ngIf="gameSession && gameSession.result === '' && isDisabled">
-     <h2>Opponent already waiting for your move</h2>
+  <p>{{ gameSession.result }}</p>
   <button mat-raised-button color="accent"
           matTooltip="play next round"
           (click)="onReset()">

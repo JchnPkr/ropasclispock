@@ -24,6 +24,10 @@ export class GameComponent implements OnInit {
     this.sessionSubscription = this.gService.sessionChanged.subscribe(
       (gameSession: GameSession) => {
         this.gameSession = gameSession;
+
+        if(!this.gameSession.result) {
+          this.isDisabled = false;
+        }
       }
     );
 
