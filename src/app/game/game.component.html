@@ -52,7 +52,7 @@
   <h2>{{ gameSession.result }}</h2>
 </div>
 <div fxLayout="column" fxLayoutAlign="center center"
-     *ngIf="(gameSession && gameSession.result === '' && isDisabled">
+     *ngIf="gameSession && gameSession.result === '' && isDisabled">
      <h2>Opponent already waiting for your move</h2>
   <button mat-raised-button color="accent"
           matTooltip="play next round"
