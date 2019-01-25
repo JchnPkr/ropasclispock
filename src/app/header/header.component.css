@@ -1,17 +1,13 @@
 #head-navbar {
   width: 100%;
   display: inline-block;
-  overflow: hidden;
 }
 .nav>li {
+  position: relative;
   display: inline-block;
-  white-space: nowrap;
   padding-left: 15px;
 }
 ul.navbar-nav{
-  display: inline-block;
-}
-
-.container-fluid {
+  position: relative;
   display: inline-block;
 }
