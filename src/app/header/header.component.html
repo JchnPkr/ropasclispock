@@ -1,46 +1,33 @@
-<nav class="navbar fixed-top navbar-dark bg-dark" id="head-navbar">
+<nav class="navbar fixed-top navbar-dark bg-dark">
   <div class="container-fluid">
     <div class="navbar-header">
-      <a routerLinkActive="active"
-         routerLink="/"
-         class="navbar-brand">Home</a>
+      <a routerLinkActive="active" routerLink="/" class="navbar-brand">Home</a>
     </div>
-      <ul class="nav navbar-nav">
-        <ng-template [ngIf]="isAuth">
-          <li role="presentation"
-              routerLinkActive="active">
-            <a class="nav-link"
-               routerLink="/opponentList">Opponents</a>
-          </li>
-        </ng-template>
-        <ng-template [ngIf]="gameSession">
-          <li role="presentation"
-              routerLinkActive="active">
-            <a class="nav-link"
-               [routerLink]="'/game/' + [gameSession.gId]">Game</a>
-          </li>
-        </ng-template>
-      </ul>
-      <ul class="nav navbar-nav ml-auto justify-content-end">
-        <ng-template [ngIf]="!isAuth">
-          <li role="presentation"
-              routerLinkActive="active">
-            <a class="nav-link"
-               routerLink="/signup">Signup</a>
-          </li>
-          <li role="presentation"
-              routerLinkActive="active">
-            <a class="nav-link"
-               routerLink="/login">Login</a>
-          </li>
-        </ng-template>
-        <li role="presentation"
-            routerLinkActive="active">
-          <a class="nav-link"
-             style= "cursor: pointer"
-             (click)="onLogout()"
-             *ngIf="isAuth">Logout</a>
+    <ul class="nav navbar-nav">
+      <ng-template [ngIf]="isAuth">
+        <li role="presentation" routerLinkActive="active">
+          <a class="nav-link" routerLink="/opponentList">Opponents</a>
         </li>
-      </ul>
-    </div>
+      </ng-template>
+      <ng-template [ngIf]="gameSession">
+        <li role="presentation" routerLinkActive="active">
+          <a class="nav-link" [routerLink]="'/game/' + [gameSession.gId]">Game</a>
+        </li>
+      </ng-template>
+    </ul>
+    <ul class="nav navbar-nav ml-auto justify-content-end">
+      <ng-template [ngIf]="!isAuth">
+        <li role="presentation" routerLinkActive="active">
+          <a class="nav-link" routerLink="/signup">Signup</a>
+        </li>
+        <li role="presentation" routerLinkActive="active">
+          <a class="nav-link" routerLink="/login">Login</a>
+        </li>
+      </ng-template>
+      <li>
+        <a class="nav-link" style="cursor: pointer" 
+           (click)="onLogout()" *ngIf="isAuth">Logout</a>
+      </li>
+    </ul>
+  </div>
 </nav>
