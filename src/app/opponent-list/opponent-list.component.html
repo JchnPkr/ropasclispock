@@ -1,11 +1,17 @@
 <div fxLayout="column" fxLayoutAlign="center center"
-     *ngIf="playerOne && (playerOne.state != 'requested')">
+     *ngIf="playerOne && (playerOne.state === 'waiting')">
   <h4>Hi {{ playerOne.name }}</h4>
   <h4>Choose an opponent to start a new Game, or wait till you are invited.</h4>
   <p>(Choose yourself to play against AI)</p>
+  <hr>
+  <div class="col-md-3">
+    <app-opponent
+      *ngFor="let opponent of opponentList"
+      [opponent]="opponent">
+    </app-opponent>
+  </div>
 </div>
-<div align="center"
-     *ngIf="playerTwo && playerOne && (playerOne.state === 'requested')">
+<div *ngIf="playerTwo && playerOne && (playerOne.state === 'requested')">
   <h4>You have been requested for a game by {{ playerTwo.name }}</h4>
   <br>
   <mat-button-toggle-group (change)="onSubmit($event)">
@@ -13,12 +19,7 @@
     <mat-button-toggle value="decline">decline</mat-button-toggle>
   </mat-button-toggle-group>
 </div>
-<hr>
-<div fxLayout="column" fxLayoutAlign="center center">
-  <div class="col-md-3">
-    <app-opponent
-      *ngFor="let opponent of opponentList"
-      [opponent]="opponent">
-    </app-opponent>
-  </div>
+<div fxLayout="column" fxLayoutAlign="center center" 
+     *ngIf="playerOne && (playerOne.state != 'waiting')">
+  <h4>You are currently in a game. Cancel it to see available opponents!</h4>
 </div>

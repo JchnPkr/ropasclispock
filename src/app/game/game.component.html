@@ -1,53 +1,51 @@
-  <div fxLayout="row" fxLayoutAlign="center center">
-      <app-player *ngIf="gameSession"></app-player>
-      <ng-template [ngIf]="!gameSession">
-        <div fxLayout="column" fxLayoutAlign="center center">
-          <h4>Your opponent has left the game!</h4>
-          <br>
-          <button mat-raised-button color="accent"
-                  matTooltip="return to opponent list"
-                  (click)="onReturn()">
-            <mat-icon class="black-icon">arrow_back</mat-icon>
-          </button>
-        </div>
-      </ng-template>
-    </div>
-  <hr>
-  <div fxLayout="column" fxLayoutAlign="center center">
-        <mat-button-toggle-group (change)="onSubmit($event)"
-                                 [disabled]="isDisabled"
-                                 [(ngModel)]="groupModelCheckedMarker">
-          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="rock">
-            <i class="fas fa-hand-rock fa-3x"></i>
-          </mat-button-toggle>
-          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="paper">
-            <i class="fas fa-hand-paper fa-3x"></i>
-          </mat-button-toggle>
-          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="scissors">
-            <i class="fas fa-hand-scissors fa-3x"></i>
-          </mat-button-toggle>
-          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="lizard">
-            <i class="fas fa-hand-lizard fa-3x"></i>
-          </mat-button-toggle>
-          <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="spock">
-            <i class="fas fa-hand-spock fa-3x"></i>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-        <ng-template [ngIf]="(gameSession && gameSession.result)">
-          <br>
-          <div fxLayout="row" fxLayoutAlign="center center">
-          <div class="eval-text">{{ gameSession.result }}</div>
-          <button mat-raised-button color="accent"
-                  matTooltip="play next round"
-                  (click)="onReset()">
-            <mat-icon class="black-icon">refresh</mat-icon>
-          </button>
-        </div>
-        </ng-template>
+<div fxLayout="row" fxLayoutAlign="center center">
+  <app-player *ngIf="gameSession"></app-player>
+  <ng-template [ngIf]="!gameSession">
+    <div fxLayout="column" fxLayoutAlign="center center">
+      <h4>Your opponent has left the game!</h4>
       <br>
       <button mat-raised-button color="accent"
-              matTooltip="leave current game"
-              (click)="onCancel()">
-        <mat-icon class="black-icon">cancel</mat-icon>
+              matTooltip="return to opponent list"
+              (click)="onReturn()">
+        <mat-icon class="black-icon">arrow_back</mat-icon>
       </button>
+    </div>
+  </ng-template>
+</div>
+<hr>
+<div fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="10px">
+  <mat-button-toggle-group (change)="onSubmit($event)"
+                           [disabled]="isDisabled"
+                           [(ngModel)]="groupModelCheckedMarker">
+    <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="rock">
+      <i class="fas fa-hand-rock fa-3x"></i>
+    </mat-button-toggle>
+    <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="paper">
+      <i class="fas fa-hand-paper fa-3x"></i>
+    </mat-button-toggle>
+    <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="scissors">
+      <i class="fas fa-hand-scissors fa-3x"></i>
+    </mat-button-toggle>
+    <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="lizard">
+      <i class="fas fa-hand-lizard fa-3x"></i>
+    </mat-button-toggle>
+    <mat-button-toggle [checked]="groupModelCheckedMarker === 'foo'" value="spock">
+      <i class="fas fa-hand-spock fa-3x"></i>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+  <ng-template [ngIf]="(gameSession && gameSession.result)">
+    <div fxLayout="row" fxLayoutAlign="center center">
+      <div class="eval-text">{{ gameSession.result }}</div>
+      <button mat-raised-button color="accent"
+              matTooltip="play next round"
+              (click)="onReset()">
+        <mat-icon class="black-icon">refresh</mat-icon>
+      </button>
+    </div>
+  </ng-template>
+  <button mat-raised-button color="accent"
+          matTooltip="leave current game"
+          (click)="onCancel()">
+    <mat-icon class="black-icon">cancel</mat-icon>
+  </button>
 </div>
