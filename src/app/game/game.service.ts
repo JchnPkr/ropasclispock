@@ -72,7 +72,7 @@ export class GameService {
     this.playerOneChanged.next(this.playerOne);
     console.log("---debug-updatePlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
 
-    if(this.playerOne.state ==='requested') {
+    if(this.playerOne.state ==='accepted') {
       this.updateGameSessionFromRequest();
     }
   }
@@ -422,7 +422,7 @@ export class GameService {
         });
     }
     else {
-      return this.createEmptyPromise('resetGameSession: session already null! resolved anyways!');
+      return this.createEmptyPromise('cancelGameSession: session already null! resolved anyways!');
     }
   }
 

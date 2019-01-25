@@ -26,7 +26,7 @@ export class GameComponent implements OnInit {
         this.gameSession = gameSession;
 
         if(!this.gameSession.result) {
-          this.isDisabled = false;
+          this.resetButtons();
         }
       }
     );
@@ -41,10 +41,14 @@ export class GameComponent implements OnInit {
 
   onReset() {
     this.gService.resetGame();
+    this.resetButtons();
+  }
+
+  private resetButtons() {
     this.isDisabled = false;
     this.groupModelCheckedMarker = null;
   }
-
+  
   onCancel() {
     this.router.navigate(['/opponentList'])
       .then(res => {

@@ -1,6 +1,7 @@
-<div align="center"
+<div fxLayout="column" fxLayoutAlign="center center"
      *ngIf="playerOne && (playerOne.state != 'requested')">
-  <h4>Choose a player to start a new Game, or wait till you are invited.</h4>
+  <h4>Hi {{ playerOne.name }}</h4>
+  <h4>Choose an opponent to start a new Game, or wait till you are invited.</h4>
   <p>(Choose yourself to play against AI)</p>
 </div>
 <div align="center"

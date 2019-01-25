@@ -43,12 +43,17 @@ export class OpponentListComponent implements OnInit, OnDestroy {
       }
     );
 
+    this.playerOne = this.gameService.playerOne;
+    this.playerTwo = this.gameService.playerTwo;
     this.opponentList = this.gameService.players;
   }
 
   onSubmit(event: any) {
     if(event.value === 'accept') {
-      this.router.navigate(['game/' + this.gameService.gameSession.gId]);
+      this.gameService.updatePlayerOneStateInGame('accepted')
+        .then(ref => {
+          this.router.navigate(['game/' + this.gameService.gameSession.gId]);
+        });
     }
     else if(event.value === 'decline') {
       this.gameService.cancelGameSession();

@@ -1,5 +1,4 @@
-  <div class="row">
-    <div class="col">
+  <div fxLayout="row" fxLayoutAlign="center center">
       <app-player *ngIf="gameSession"></app-player>
       <ng-template [ngIf]="!gameSession">
         <div fxLayout="column" fxLayoutAlign="center center">
@@ -13,12 +12,8 @@
         </div>
       </ng-template>
     </div>
-  </div>
   <hr>
-  <div fxLayout="row">
-    <div fxFlex="10">
-    </div>
-      <div fxFlex fxLayoutAlign="center center">
+  <div fxLayout="column" fxLayoutAlign="center center">
         <mat-button-toggle-group (change)="onSubmit($event)"
                                  [disabled]="isDisabled"
                                  [(ngModel)]="groupModelCheckedMarker">
@@ -38,21 +33,21 @@
             <i class="fas fa-hand-spock fa-3x"></i>
           </mat-button-toggle>
         </mat-button-toggle-group>
-      </div>
-    <div fxFlex="10" fxLayoutAlign="end center">
+        <ng-template [ngIf]="(gameSession && gameSession.result)">
+          <br>
+          <div fxLayout="row" fxLayoutAlign="center center">
+          <div class="eval-text">{{ gameSession.result }}</div>
+          <button mat-raised-button color="accent"
+                  matTooltip="play next round"
+                  (click)="onReset()">
+            <mat-icon class="black-icon">refresh</mat-icon>
+          </button>
+        </div>
+        </ng-template>
+      <br>
       <button mat-raised-button color="accent"
               matTooltip="leave current game"
               (click)="onCancel()">
         <mat-icon class="black-icon">cancel</mat-icon>
       </button>
-    </div>
-  </div>
-<div fxLayout="column" fxLayoutAlign="center center"
-     *ngIf="(gameSession && gameSession.result)">
-  <p>{{ gameSession.result }}</p>
-  <button mat-raised-button color="accent"
-          matTooltip="play next round"
-          (click)="onReset()">
-    <mat-icon class="black-icon">refresh</mat-icon>
-  </button>
 </div>
