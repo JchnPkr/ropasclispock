@@ -67,7 +67,7 @@ export class GameService {
       }));
   }
 
-  updatePlayerOne() {
+  private updatePlayerOne() {
     this.playerOne = this.players.find(i => i.id === this.playerOne.id);
     this.playerOneChanged.next(this.playerOne);
     console.log("---debug-updatePlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
@@ -77,7 +77,7 @@ export class GameService {
     }
   }
 
-  updateGameSessionFromRequest() {
+  private updateGameSessionFromRequest() {
     var gId = this.playerOne.gameId;
     this.sessionSub = this.db.collection('games').doc(gId).snapshotChanges()
       .subscribe(doc => {
@@ -101,7 +101,7 @@ export class GameService {
       });
   }
 
-  updatePlayerTwo() {
+  private updatePlayerTwo() {
     if(!this.isAIenabled && this.playerTwo && this.gameSession) {
       this.playerTwo = this.players.find(i => i.id === this.gameSession.pTwoId);
       this.playerTwoChanged.next(this.playerTwo);
@@ -109,7 +109,7 @@ export class GameService {
     }
   }
 
-  updatePlayerTwoFromRequest() {
+  private updatePlayerTwoFromRequest() {
     //gameSession from DB was created by requester, so pOneId of this session is pTwoId
     //for this client actually
     this.playerTwo = this.players.find(i => i.id === this.gameSession.pOneId);
@@ -140,7 +140,7 @@ export class GameService {
     }
   }
 
-  enableAI() {
+  private enableAI() {
     console.log("---debug-enableAI");
 
     return this.updatePlayerOneStateInGame('inGame')
@@ -153,7 +153,7 @@ export class GameService {
       });
   }
 
-  createAIPlayerTwo() {
+  private createAIPlayerTwo() {
     console.log("---debug-createAIPlayerTwo");
 
     this.playerTwo = new PlayerImpl('AllbutIntelligent');
@@ -161,7 +161,7 @@ export class GameService {
     this.playerTwoChanged.next(this.playerTwo);
   }
 
-  createLocalGameSession() {
+  private createLocalGameSession() {
     console.log("---debug-createLocalGameSession");
 
     var gameId = this.playerOne.name + 'VsAI';
@@ -169,14 +169,14 @@ export class GameService {
     this.sessionChanged.next(this.gameSession);
   }
 
-  updateAIGameIdOnPlayers() {
+  private updateAIGameIdOnPlayers() {
     console.log("---debug-updateAIGameIdOnPlayers");
 
     this.playerOne.gameId = this.gameSession.gId;
     this.playerTwo.gameId = this.gameSession.gId;
   }
 
-  createEmptyPromise(logMessage: string) {
+  private createEmptyPromise(logMessage: string) {
     var promise = new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         console.log("---debug-createEmptyPromise: " + logMessage);
@@ -195,14 +195,14 @@ export class GameService {
       });
   }
 
-  addPlayerTwoToLocalGame(pTwo: Player) {
+  private addPlayerTwoToLocalGame(pTwo: Player) {
     this.playerTwo = this.players.find(i => i.id === pTwo.id);
     this.playerTwoChanged.next(this.playerTwo);
     console.log("---debug-addPlayerTwoToLocalGame: ", JSON.parse(JSON.stringify(this.playerTwo)));
     return this.createEmptyPromise('addPlayerTwoToLocalGame');
   }
 
-  createGameSession() {
+  private createGameSession() {
     this.gameSession = new GameSessionImpl('', this.playerOne.id, this.playerTwo.id);
     return this.db.collection('games').add({...this.gameSession})
       .then(docRef => {
@@ -212,7 +212,7 @@ export class GameService {
       });
   }
 
-  subscribeGameSession() {
+  private subscribeGameSession() {
     this.sessionSub = this.db.collection('games').doc(this.gameSession.gId).snapshotChanges()
       .subscribe(doc => {
         if(doc.payload.data()) {
@@ -228,7 +228,7 @@ export class GameService {
       });
   }
 
-  updateGameIdPlayerOne() {
+  private updateGameIdPlayerOne() {
     this.db.collection('players').doc(this.playerOne.id).update({gameId: this.gameSession.gId})
       .then(result => {
         this.playerOne.gameId = this.gameSession.gId;
@@ -237,7 +237,7 @@ export class GameService {
       });
   }
 
-  updatePlayerTwoGameIdAndStateRequested() {
+  private updatePlayerTwoGameIdAndStateRequested() {
     this.db.collection('players').doc(this.playerTwo.id).update({gameId: this.gameSession.gId, state: 'requested'})
       .then(result => {
         this.playerTwo = this.players.find(i => i.id === this.playerTwo.id);
@@ -263,7 +263,7 @@ export class GameService {
     }
   }
 
-  evaluateResultAI(choice: string) {
+  private evaluateResultAI(choice: string) {
     this.updatePlayerChoiceAIGame(choice);
     var generatedChoice = this.generateRandomChoiceOnAIPlayer();
     this.updateChoiceAIPlayer(generatedChoice);
@@ -271,26 +271,26 @@ export class GameService {
     this.updateAIGameResult(result);
   }
 
-  updatePlayerChoiceAIGame(choice: string) {
+  private updatePlayerChoiceAIGame(choice: string) {
     this.playerOne.lastChosen = choice;
     this.playerOneChanged.next(this.playerOne);
   }
 
-  generateRandomChoiceOnAIPlayer() {
+  private generateRandomChoiceOnAIPlayer() {
     var randomIndex = this.generateRandomNatFromZeroTillMax(5);
     return this.possibleChoices[randomIndex];
   }
 
-  generateRandomNatFromZeroTillMax(max: number) {
+  private generateRandomNatFromZeroTillMax(max: number) {
     return Math.floor(Math.random() * Math.floor(max));
   }
 
-  updateChoiceAIPlayer(generatedChoice) {
+  private updateChoiceAIPlayer(generatedChoice) {
     this.playerTwo.lastChosen = generatedChoice;
     this.playerTwoChanged.next(this.playerTwo);
   }
 
-  updatePlayerChoiceInDB(choice: string) {
+  private updatePlayerChoiceInDB(choice: string) {
     return this.db.collection('players').doc(this.playerOne.id).update({lastChosen: choice})
       .then(ref => {
         this.playerOne.lastChosen = choice;
@@ -298,7 +298,7 @@ export class GameService {
       });
   }
 
-  evaluateWinner() {
+  private evaluateWinner() {
     console.log("---debug-evaluateWinner");
 
     if(!this.playerOne.lastChosen || !this.playerTwo.lastChosen) {
@@ -325,7 +325,7 @@ export class GameService {
     }
   }
 
-  updatePlayerOneWinCount() {
+  private updatePlayerOneWinCount() {
     if(this.isAIenabled) {
       this.playerOneChanged.next(this.playerOne);
     }
@@ -337,7 +337,7 @@ export class GameService {
     }
   }
 
-  updatePlayerTwoWinCount() {
+  private updatePlayerTwoWinCount() {
     if(this.isAIenabled) {
       this.playerTwoChanged.next(this.playerTwo);
     }
@@ -349,12 +349,12 @@ export class GameService {
     }
   }
 
-  updateAIGameResult(result: string) {
+  private updateAIGameResult(result: string) {
       this.gameSession.result = result;
       this.sessionChanged.next(this.gameSession);
   }
 
-  updateGameResultInDB(result: string) {
+  private updateGameResultInDB(result: string) {
     this.db.collection('games').doc(this.gameSession.gId).update({result: result})
       .then(ref => {
         this.gameSession.result = result;
@@ -370,7 +370,7 @@ export class GameService {
       });
   }
 
-  cancelSubscriptions() {
+  private cancelSubscriptions() {
   this.fbSubs.forEach(sub => sub.unsubscribe());
     console.log("---debug-cancelSubscriptions");
   }
@@ -386,7 +386,7 @@ export class GameService {
     }
   }
 
-  disableAI() {
+  private disableAI() {
     console.log('---debug-disableAI');
     this.isAIenabled = false;
     this.resetAISession();
@@ -394,19 +394,19 @@ export class GameService {
     return this.resetPlayerOneGameSession();
   }
 
-  resetAISession() {
+  private resetAISession() {
     console.log('---debug-resetAISession');
     this.gameSession = null;
     this.sessionChanged.next(this.gameSession);
   }
 
-  resetAIPlayer() {
+  private resetAIPlayer() {
     console.log('---debug-resetAIPlayer');
     this.playerTwo = null;
     this.playerTwoChanged.next(this.playerTwo);
   }
 
-  cancelGameSessionInDB() {
+  private cancelGameSessionInDB() {
     this.sessionSub.unsubscribe();
 
     if(this.gameSession) {
@@ -426,7 +426,7 @@ export class GameService {
     }
   }
 
-  resetPlayerTwo() {
+  private resetPlayerTwo() {
     return this.db.collection('players').doc(this.playerTwo.id).update({gameId: null, lastChosen: '', state: 'waiting'})
       .then(ref => {
         this.playerTwo = null;
@@ -435,7 +435,7 @@ export class GameService {
       });
   }
 
-  resetPlayerOneGameSession() {
+  private resetPlayerOneGameSession() {
     return this.db.collection('players').doc(this.playerOne.id).update({gameId: null, lastChosen: '', state: 'waiting'})
       .then(ref => {
         this.playerOne = this.players.find(i => i.id === this.playerOne.id);
@@ -444,7 +444,7 @@ export class GameService {
       });
   }
 
-  resetClientsidePlayersAndRemovePlayerFromDB() {
+  private resetClientsidePlayersAndRemovePlayerFromDB() {
     if(this.playerOne) {
       return this.db.collection('players').doc(this.playerOne.id).delete()
         .then(ref => {
@@ -473,13 +473,13 @@ export class GameService {
     }
   }
 
-  resetAIGameResult() {
+  private resetAIGameResult() {
     this.gameSession.result = null;
     this.sessionChanged.next(this.gameSession);
     console.log("---debug-resetAIGameResult");
   }
 
-  resetLastChosenOnPlayersAI() {
+  private resetLastChosenOnPlayersAI() {
     console.log("---debug-resetLastChosenOnPlayersAI");
     this.playerOne.lastChosen = '';
     this.playerOneChanged.next(this.playerOne);
@@ -487,7 +487,7 @@ export class GameService {
     this.playerTwoChanged.next(this.playerTwo);
   }
 
-  resetGameResultInDB() {
+  private resetGameResultInDB() {
     return this.db.collection('games').doc(this.gameSession.gId).update({result: null})
       .then(ref => {
         this.gameSession.result = null;
@@ -506,7 +506,7 @@ export class GameService {
     this.playerTwoChanged.next(this.playerTwo);
   }
 
-  resetLastChosenOnPlayers() {
+  private resetLastChosenOnPlayers() {
     if(this.playerOne.lastChosen != '') {
       this.db.collection('players').doc(this.playerOne.id).update({lastChosen: ''})
         .then(ref => {
