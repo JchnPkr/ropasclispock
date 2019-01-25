@@ -72,7 +72,7 @@ export class GameService {
     this.playerOneChanged.next(this.playerOne);
     console.log("---debug-updatePlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
 
-    if(this.playerOne.state ==='accepted') {
+    if((this.playerOne.state === 'requested') || (this.playerOne.state === 'accepted')) {
       this.updateGameSessionFromRequest();
     }
   }
