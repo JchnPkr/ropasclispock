@@ -11,7 +11,8 @@
     </app-opponent>
   </div>
 </div>
-<div *ngIf="playerTwo && playerOne && (playerOne.state === 'requested')">
+<div fxLayout="column" fxLayoutAlign="center center"
+     *ngIf="playerTwo && playerOne && (playerOne.state === 'requested')">
   <h4>You have been requested for a game by {{ playerTwo.name }}</h4>
   <br>
   <mat-button-toggle-group (change)="onSubmit($event)">
@@ -19,7 +20,7 @@
     <mat-button-toggle value="decline">decline</mat-button-toggle>
   </mat-button-toggle-group>
 </div>
-<div fxLayout="column" fxLayoutAlign="center center" 
-     *ngIf="playerOne && (playerOne.state != 'waiting')">
+<div fxLayout="column" fxLayoutAlign="center center"
+     *ngIf="playerOne && (playerOne.state === 'accepted')">
   <h4>You are currently in a game. Cancel it to see available opponents!</h4>
 </div>

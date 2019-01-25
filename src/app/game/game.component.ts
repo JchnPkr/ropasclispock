@@ -35,8 +35,8 @@ export class GameComponent implements OnInit {
   }
 
   onSubmit(event: any) {
-    this.gService.updatePlayerOneChoiceAndTryEvaluate(event.value);
     this.isDisabled = true;
+    this.gService.updatePlayerOneChoiceAndTryEvaluate(event.value);
   }
 
   onReset() {
@@ -48,7 +48,7 @@ export class GameComponent implements OnInit {
     this.isDisabled = false;
     this.groupModelCheckedMarker = null;
   }
-  
+
   onCancel() {
     this.router.navigate(['/opponentList'])
       .then(res => {
