@@ -105,7 +105,7 @@ export class GameService {
           else {
             this.gameSession = null;
             console.log("---debug-subscribeGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
-            this.sessionChanged.next();
+            this.sessionChanged.next(this.gameSession);
           }
           resolve(true)
         }, (err) => {
@@ -238,7 +238,7 @@ export class GameService {
         else {
           this.gameSession = null;
           console.log("---debug-subscribeGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
-          this.sessionChanged.next();
+          this.sessionChanged.next(this.gameSession);
         }
       });
   }
@@ -498,7 +498,7 @@ export class GameService {
 
   private resetAIGameResult() {
     this.gameSession.result = null;
-    this.sessionChanged.next();
+    this.sessionChanged.next(this.gameSession);
     console.log("---debug-resetAIGameResult");
   }
 

@@ -67,7 +67,7 @@ export class AuthService {
         this.gService.resetApp()
           .then(ref => {
             console.log("---debug-logOut");
-            this.authSub.unsubscribe();
+            // this.authSub.unsubscribe();
             this.afAuth.auth.signOut();
           });
       });
