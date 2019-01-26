@@ -63,7 +63,13 @@ export class GameService {
         console.log("---debug: Fetched players! ", JSON.parse(JSON.stringify(this.players)));
 
         this.updatePlayerOne();
-        this.updatePlayerTwo();
+
+        if(this.playerOne.state ===  'inGame') {
+          this.updatePlayerTwo();
+        }
+        else if(this.playerOne.state === 'accepted'){
+          this.updatePlayerTwoFromRequest();
+        }
       }));
   }
 
@@ -72,12 +78,12 @@ export class GameService {
     this.playerOneChanged.next(this.playerOne);
     console.log("---debug-updatePlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
 
-    if((this.playerOne.state === 'requested') || (this.playerOne.state === 'accepted')) {
-      this.updateGameSessionFromRequest();
+    if(this.playerOne.state === 'requested') {
+      this.subscribeGameSessionFromRequest();
     }
   }
 
-  private updateGameSessionFromRequest() {
+  private subscribeGameSessionFromRequest() {
     var gId = this.playerOne.gameId;
     this.sessionSub = this.db.collection('games').doc(gId).snapshotChanges()
       .subscribe(doc => {
@@ -90,8 +96,6 @@ export class GameService {
           this.gameSession.result = (doc.payload.data() as GameSession).result;
           this.sessionChanged.next(this.gameSession);
           console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
-
-          this.updatePlayerTwoFromRequest();
         }
         else {
           this.gameSession = null;
@@ -407,9 +411,8 @@ export class GameService {
   }
 
   private cancelGameSessionInDB() {
-    this.sessionSub.unsubscribe();
-
     if(this.gameSession) {
+      this.sessionSub.unsubscribe();
       return this.db.collection('games').doc(this.gameSession.gId).delete()
         .then(ref => {
           console.log('---debug-cancelGameSession');
@@ -496,16 +499,6 @@ export class GameService {
       });
   }
 
-  /**
-   *in case a game has been canceled by the opponent,
-   *only the own client has to be cleaned up
-   */
-  cleanUpAbortedSession() {
-    console.log("---debug-cleanUpAbortedSession");
-    this.playerTwo = null;
-    this.playerTwoChanged.next(this.playerTwo);
-  }
-
   private resetLastChosenOnPlayers() {
     if(this.playerOne.lastChosen != '') {
       this.db.collection('players').doc(this.playerOne.id).update({lastChosen: ''})
@@ -523,5 +516,15 @@ export class GameService {
     else {
       console.log("---debug-resetLastChosenOnPlayers: Last choice already reset. Nothing to do.");
     }
+  }
+
+  /**
+   *in case a game has been canceled by the opponent,
+   *only the own client has to be cleaned up
+   */
+  cleanUpAbortedSession() {
+    console.log("---debug-cleanUpAbortedSession");
+    this.playerTwo = null;
+    this.playerTwoChanged.next(this.playerTwo);
   }
 }
