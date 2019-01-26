@@ -25,7 +25,7 @@ export class GameComponent implements OnInit {
       (gameSession: GameSession) => {
         this.gameSession = gameSession;
 
-        if(!this.gameSession.result) {
+        if(this.gameSession && !this.gameSession.result) {
           this.resetButtons();
         }
       }

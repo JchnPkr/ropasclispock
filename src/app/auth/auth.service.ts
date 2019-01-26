@@ -37,10 +37,10 @@ export class AuthService {
       authData.email,
       authData.password
     ).then(result => {
-      console.log(result);
+      console.log("---debug-signupUser: " + result);
       this.gService.addPlayerOneToDB(new PlayerImpl(authData.email.split('@')[0]));
     }).catch(error => {
-      console.log(error);
+      console.log("---error-signupUser: " + error);
     });
   }
 
@@ -48,10 +48,10 @@ export class AuthService {
     this.afAuth.auth.signInWithEmailAndPassword(
       authData.email, authData.password
     ).then(result => {
-      console.log(result);
+      console.log("---debug-loginUser: " + result);
       this.gService.addPlayerOneToDB(new PlayerImpl(authData.email.split('@')[0]));
     }).catch(error => {
-      console.log(error);
+      console.log("---error-loginUser: " + error);
     });
   }
 
@@ -64,6 +64,7 @@ export class AuthService {
       .then(ref => {
         this.gService.resetApp()
           .then(ref => {
+            console.log("---debug-logOut: " + ref);
             this.afAuth.auth.signOut();
           });
       });

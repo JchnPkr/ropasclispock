@@ -60,15 +60,23 @@ export class GameService {
       ).subscribe((players: Player[]) => {
         this.players = players;
         this.playersChanged.next([...this.players]);
-        console.log("---debug: Fetched players! ", JSON.parse(JSON.stringify(this.players)));
+        console.log("---debug-fetchAvailablePlayers ", JSON.parse(JSON.stringify(this.players)));
 
         this.updatePlayerOne();
 
         if(this.playerOne.state ===  'inGame') {
           this.updatePlayerTwo();
         }
-        else if(this.playerOne.state === 'accepted'){
-          this.updatePlayerTwoFromRequest();
+        else if((this.playerOne.state === 'requested') || (this.playerOne.state === 'accepted')) {
+          if(this.playerOne.state === 'requested') {
+            this.subscribeGameSessionFromRequest()
+              .then(ref => {
+                this.updatePlayerTwoFromRequest();
+              });
+          }
+          else {
+            this.updatePlayerTwoFromRequest();
+          }
         }
       }));
   }
@@ -77,32 +85,33 @@ export class GameService {
     this.playerOne = this.players.find(i => i.id === this.playerOne.id);
     this.playerOneChanged.next(this.playerOne);
     console.log("---debug-updatePlayerOne: ", JSON.parse(JSON.stringify(this.playerOne)));
-
-    if(this.playerOne.state === 'requested') {
-      this.subscribeGameSessionFromRequest();
-    }
   }
 
   private subscribeGameSessionFromRequest() {
     var gId = this.playerOne.gameId;
-    this.sessionSub = this.db.collection('games').doc(gId).snapshotChanges()
-      .subscribe(doc => {
-        if(doc.payload.data()) {
-          //gameSession from DB was created by requester, so pOneId of this session is pTwoId
-          //for this client actually
-          // console.log("---debug-updateGameSessionFromRequest (doc): ", JSON.parse(JSON.stringify(doc)));
-          var pTwoId = (doc.payload.data() as GameSession).pOneId;
-          this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
-          this.gameSession.result = (doc.payload.data() as GameSession).result;
-          this.sessionChanged.next(this.gameSession);
-          console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
-        }
-        else {
-          this.gameSession = null;
-          this.sessionChanged.next(this.gameSession);
-          console.log("---debug-updateGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
-        }
-      });
+    return new Promise((resolve,reject) => {
+      this.sessionSub = this.db.collection('games').doc(gId).snapshotChanges()
+        .subscribe(doc => {
+          if(doc.payload.data()) {
+            //gameSession from DB was created by requester, so pOneId of this session is pTwoId
+            //for this client actually
+            // console.log("---debug-updateGameSessionFromRequest (doc): ", JSON.parse(JSON.stringify(doc)));
+            var pTwoId = (doc.payload.data() as GameSession).pOneId;
+            this.gameSession = new GameSessionImpl(doc.payload.id, pTwoId, this.playerOne.id);
+            this.gameSession.result = (doc.payload.data() as GameSession).result;
+            this.sessionChanged.next(this.gameSession);
+            console.log("---debug-subscribeGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
+          }
+          else {
+            this.gameSession = null;
+            console.log("---debug-subscribeGameSessionFromRequest: ", JSON.parse(JSON.stringify(this.gameSession)));
+            this.sessionChanged.next();
+          }
+          resolve(true)
+        }, (err) => {
+          resolve(false);
+        });
+    });
   }
 
   private updatePlayerTwo() {
@@ -114,11 +123,13 @@ export class GameService {
   }
 
   private updatePlayerTwoFromRequest() {
-    //gameSession from DB was created by requester, so pOneId of this session is pTwoId
-    //for this client actually
-    this.playerTwo = this.players.find(i => i.id === this.gameSession.pOneId);
-    this.playerTwoChanged.next(this.playerTwo);
-    console.log("---debug-updatePlayerTwoFromRequest: ", JSON.parse(JSON.stringify(this.playerTwo)));
+    if(this.gameSession) {
+      //gameSession from DB was created by requester, so pOneId of this session is pTwoId
+      //for this client actually
+      this.playerTwo = this.players.find(i => i.id === this.gameSession.pOneId);
+      this.playerTwoChanged.next(this.playerTwo);
+      console.log("---debug-updatePlayerTwoFromRequest: ", JSON.parse(JSON.stringify(this.playerTwo)));
+    }
   }
 
   startNewGame(pTwo: Player) {
@@ -226,9 +237,9 @@ export class GameService {
         }
         else {
           this.gameSession = null;
-          this.sessionChanged.next(this.gameSession);
+          console.log("---debug-subscribeGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
+          this.sessionChanged.next();
         }
-        console.log("---debug-subscribeGameSession: ", JSON.parse(JSON.stringify(this.gameSession)));
       });
   }
 
@@ -246,7 +257,7 @@ export class GameService {
       .then(result => {
         this.playerTwo = this.players.find(i => i.id === this.playerTwo.id);
         this.playerTwoChanged.next(this.playerTwo);
-        console.log("---debug-addPlayerTwo: ", JSON.parse(JSON.stringify(this.playerTwo)));
+        console.log("---debug-updatePlayerTwoGameIdAndStateRequested: ", JSON.parse(JSON.stringify(this.playerTwo)));
     });
   }
 
@@ -268,6 +279,7 @@ export class GameService {
   }
 
   private evaluateResultAI(choice: string) {
+    console.log('---debug-evaluateResultAI');
     this.updatePlayerChoiceAIGame(choice);
     var generatedChoice = this.generateRandomChoiceOnAIPlayer();
     this.updateChoiceAIPlayer(generatedChoice);
@@ -276,20 +288,24 @@ export class GameService {
   }
 
   private updatePlayerChoiceAIGame(choice: string) {
+    console.log('---debug-updatePlayerChoiceAIGame');
     this.playerOne.lastChosen = choice;
     this.playerOneChanged.next(this.playerOne);
   }
 
   private generateRandomChoiceOnAIPlayer() {
+    console.log('---debug-generateRandomChoiceOnAIPlayer');
     var randomIndex = this.generateRandomNatFromZeroTillMax(5);
     return this.possibleChoices[randomIndex];
   }
 
   private generateRandomNatFromZeroTillMax(max: number) {
+    console.log('---debug-generateRandomNatFromZeroTillMax');
     return Math.floor(Math.random() * Math.floor(max));
   }
 
   private updateChoiceAIPlayer(generatedChoice) {
+    console.log('---debug-updateChoiceAIPlayer');
     this.playerTwo.lastChosen = generatedChoice;
     this.playerTwoChanged.next(this.playerTwo);
   }
@@ -297,6 +313,7 @@ export class GameService {
   private updatePlayerChoiceInDB(choice: string) {
     return this.db.collection('players').doc(this.playerOne.id).update({lastChosen: choice})
       .then(ref => {
+        console.log('---debug-updatePlayerChoiceInDB');
         this.playerOne.lastChosen = choice;
         this.playerOneChanged.next(this.playerOne);
       });
@@ -330,6 +347,7 @@ export class GameService {
   }
 
   private updatePlayerOneWinCount() {
+    console.log('---debug-updatePlayerOneWinCount');
     if(this.isAIenabled) {
       this.playerOneChanged.next(this.playerOne);
     }
@@ -342,6 +360,7 @@ export class GameService {
   }
 
   private updatePlayerTwoWinCount() {
+    console.log('---debug-updatePlayerTwoWinCount');
     if(this.isAIenabled) {
       this.playerTwoChanged.next(this.playerTwo);
     }
@@ -354,6 +373,7 @@ export class GameService {
   }
 
   private updateAIGameResult(result: string) {
+    console.log('---debug-updateAIGameResult');
       this.gameSession.result = result;
       this.sessionChanged.next(this.gameSession);
   }
@@ -361,12 +381,14 @@ export class GameService {
   private updateGameResultInDB(result: string) {
     this.db.collection('games').doc(this.gameSession.gId).update({result: result})
       .then(ref => {
+        console.log('---debug-updateGameResultInDB');
         this.gameSession.result = result;
         this.sessionChanged.next(this.gameSession);
       });
   }
 
   resetApp() {
+    console.log('---debug-resetApp');
     this.cancelSubscriptions();
     return this.cancelGameSession()
       .then(ref => {
@@ -380,7 +402,7 @@ export class GameService {
   }
 
   cancelGameSession() {
-    console.log('---debug-cancelGameSession:');
+    console.log('---debug-cancelGameSession');
 
     if(this.isAIenabled) {
       return this.disableAI();
@@ -415,9 +437,7 @@ export class GameService {
       this.sessionSub.unsubscribe();
       return this.db.collection('games').doc(this.gameSession.gId).delete()
         .then(ref => {
-          console.log('---debug-cancelGameSession');
-          this.gameSession = null;
-          this.sessionChanged.next(this.gameSession);
+          console.log('---debug-cancelGameSessionInDB');
           return this.resetPlayerTwo()
             .then(ref => {
               return this.resetPlayerOneGameSession();
@@ -451,7 +471,7 @@ export class GameService {
     if(this.playerOne) {
       return this.db.collection('players').doc(this.playerOne.id).delete()
         .then(ref => {
-          console.log('---debug-resetPlayers');
+          console.log('---debug-resetClientsidePlayersAndRemovePlayerFromDB');
           this.playerOne = null;
           this.playerTwo = null;
       });
@@ -478,7 +498,7 @@ export class GameService {
 
   private resetAIGameResult() {
     this.gameSession.result = null;
-    this.sessionChanged.next(this.gameSession);
+    this.sessionChanged.next();
     console.log("---debug-resetAIGameResult");
   }
 
@@ -494,8 +514,8 @@ export class GameService {
     return this.db.collection('games').doc(this.gameSession.gId).update({result: null})
       .then(ref => {
         this.gameSession.result = null;
-        this.sessionChanged.next(this.gameSession);
         console.log("---debug-resetGameResultInDB");
+        this.sessionChanged.next();
       });
   }
 
