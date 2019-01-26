@@ -515,7 +515,7 @@ export class GameService {
       .then(ref => {
         this.gameSession.result = null;
         console.log("---debug-resetGameResultInDB");
-        this.sessionChanged.next();
+        this.sessionChanged.next(this.gameSession);
       });
   }
 
