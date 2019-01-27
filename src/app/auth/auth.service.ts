@@ -3,7 +3,6 @@ import { GameService } from 'src/app/game/game.service';
 import { Subject } from 'rxjs/Subject';
 import { Router } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
-import { Subscription } from 'rxjs';
 
 import { AuthData } from './auth-data.model';
 import { PlayerImpl } from 'src/app/player/player.model';
@@ -12,14 +11,13 @@ import { PlayerImpl } from 'src/app/player/player.model';
 export class AuthService {
   authChange = new Subject<boolean>();
   isAuthenticated: boolean;
-  authSub = new Subscription;
 
     constructor(private router: Router,
                 private afAuth: AngularFireAuth,
                 private gService: GameService){}
 
     initAuthListener() {
-      this.authSub = this.afAuth.authState.subscribe(
+      this.afAuth.authState.subscribe(
         user => {
           if(user) {
             this.isAuthenticated = true;
@@ -67,7 +65,6 @@ export class AuthService {
         this.gService.resetApp()
           .then(ref => {
             console.log("---debug-logOut");
-            // this.authSub.unsubscribe();
             this.afAuth.auth.signOut();
           });
       });
