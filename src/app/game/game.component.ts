@@ -45,6 +45,7 @@ export class GameComponent implements OnInit {
   }
 
   private resetButtons() {
+    console.log("---debug-resetButtons");
     this.isDisabled = false;
     this.groupModelCheckedMarker = null;
   }
