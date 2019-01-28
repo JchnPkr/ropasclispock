@@ -3,6 +3,7 @@ import { GameService } from 'src/app/game/game.service';
 import { Subject } from 'rxjs/Subject';
 import { Router } from '@angular/router';
 import { AngularFireAuth } from 'angularfire2/auth';
+import { NGXLogger } from 'ngx-logger';
 
 import { AuthData } from './auth-data.model';
 import { PlayerImpl } from 'src/app/player/player.model';
@@ -14,7 +15,8 @@ export class AuthService {
 
     constructor(private router: Router,
                 private afAuth: AngularFireAuth,
-                private gService: GameService){}
+                private gService: GameService,
+                private logger: NGXLogger){}
 
     initAuthListener() {
       this.afAuth.authState.subscribe(
@@ -37,10 +39,10 @@ export class AuthService {
       authData.email,
       authData.password
     ).then(result => {
-      console.log("---debug-signupUser: " + result);
+        this.logger.debug("signupUser: " + result);
       this.gService.addPlayerOneToDB(new PlayerImpl(authData.email.split('@')[0]));
     }).catch(error => {
-      console.log("---error-signupUser: " + error);
+      this.logger.error("signupUser: " + error);
     });
   }
 
@@ -48,10 +50,10 @@ export class AuthService {
     this.afAuth.auth.signInWithEmailAndPassword(
       authData.email, authData.password
     ).then(result => {
-      console.log("---debug-loginUser: " + result);
+      this.logger.debug("loginUser: " + result);
       this.gService.addPlayerOneToDB(new PlayerImpl(authData.email.split('@')[0]));
     }).catch(error => {
-      console.log("---error-loginUser: " + error);
+      this.logger.error("loginUser: " + error);
     });
   }
 
@@ -64,7 +66,7 @@ export class AuthService {
       .then(ref => {
         this.gService.resetApp()
           .then(ref => {
-            console.log("---debug-logOut");
+            this.logger.debug("logOut");
             this.afAuth.auth.signOut();
           });
       });

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { Router } from '@angular/router';
+import { NGXLogger } from 'ngx-logger';
 
 import { GameService } from 'src/app/game/game.service';
 import {GameSession} from 'src/app/game/gameSession.model';
@@ -18,7 +19,8 @@ export class GameComponent implements OnInit {
   groupModelCheckedMarker: string;
 
   constructor(private gService: GameService,
-              private router: Router) {}
+              private router: Router,
+              private logger: NGXLogger) {}
 
   ngOnInit() {
     this.sessionSubscription = this.gService.sessionChanged.subscribe(
@@ -45,7 +47,7 @@ export class GameComponent implements OnInit {
   }
 
   private resetButtons() {
-    console.log("---debug-resetButtons");
+    this.logger.debug("resetButtons");
     this.isDisabled = false;
     this.groupModelCheckedMarker = null;
   }
@@ -54,7 +56,7 @@ export class GameComponent implements OnInit {
     this.router.navigate(['/opponentList'])
       .then(res => {
         this.gService.cancelGameSession()
-          .then(ref => console.log("---debug-onCancel: Session canceled"))
+          .then(ref => this.logger.debug("onCancel: Session canceled"))
       });
   }
 
